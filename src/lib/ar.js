@@ -941,4 +941,5 @@ export const AR = {
   'Test email sent. Check the inbox (and spam).': 'تم إرسال رسالة التجربة. تحقق من البريد الوارد (والرسائل غير المرغوبة).',
   'Email is off. Add MAILGUN_API_KEY and MAILGUN_DOMAIN to the server settings to send welcome, invoice and receipt emails.': 'البريد متوقف. أضف MAILGUN_API_KEY و MAILGUN_DOMAIN إلى إعدادات الخادم لإرسال رسائل الترحيب والفواتير والإيصالات.',
   'Email is not set up. Add MAILGUN_API_KEY and MAILGUN_DOMAIN to the server settings.': 'البريد غير مُعدّ. أضف MAILGUN_API_KEY و MAILGUN_DOMAIN إلى إعدادات الخادم.',
+  'You will be charged {amount} by card (converted from {original}).': 'سيُخصم مبلغ {amount} من بطاقتك (محوّلاً من {original}).',
 };

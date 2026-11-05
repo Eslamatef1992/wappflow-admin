@@ -60,8 +60,8 @@ export default function Billing() {
                 {methods.paypal && <Button variant="dark" loading={busy} onClick={() => pay(unpaid, 'paypal')}>{tr('Pay with PayPal')}</Button>}
                 {methods.tap && <Button variant={methods.card ? 'secondary' : 'primary'} icon="card" loading={busy} onClick={() => pay(unpaid, 'tap')}>{tr('Pay with KNET or card')}</Button>}
               </div>
-              {methods.paypal && quote?.converted && (
-                <p className="text-[12px] text-[#7a4d0c]">{tr('Card and PayPal payments are charged {amount} (converted from {original}).', { amount: `${quote.value} ${quote.currency}`, original: money(unpaid.amount, unpaid.currency) })}</p>
+              {(methods.card || methods.paypal) && quote?.converted && (
+                <p className="text-[12px] text-[#7a4d0c]">{tr(methods.paypal ? 'Card and PayPal payments are charged {amount} (converted from {original}).' : 'You will be charged {amount} by card (converted from {original}).', { amount: `${quote.value} ${quote.currency}`, original: money(unpaid.amount, unpaid.currency) })}</p>
               )}
               {unpaid.provider === 'paypal' && <button className="text-[12px] underline text-[#7a4d0c]" onClick={() => check(unpaid)}>{tr('I already paid')}</button>}
             </div>
@@ -132,7 +132,7 @@ export default function Billing() {
             <p className="text-[28px] font-semibold tabular-nums" dir="ltr">{money(payFor.amount, payFor.currency)}</p>
             <p className="text-ink-3 text-[13px] -mt-2">{payFor.notes}</p>
             {payFor.paypalQuote?.converted && (methods.card || methods.paypal) && (
-              <p className="text-[12px] text-ink-3">{tr('Card and PayPal payments are charged {amount} (converted from {original}).', { amount: `${payFor.paypalQuote.value} ${payFor.paypalQuote.currency}`, original: money(payFor.amount, payFor.currency) })}</p>
+              <p className="text-[12px] text-ink-3">{tr(methods.paypal ? 'Card and PayPal payments are charged {amount} (converted from {original}).' : 'You will be charged {amount} by card (converted from {original}).', { amount: `${payFor.paypalQuote.value} ${payFor.paypalQuote.currency}`, original: money(payFor.amount, payFor.currency) })}</p>
             )}
             <div className="grid gap-2 pt-1">
               {methods.card && <Button variant="primary" icon="card" className="h-11" loading={busy} onClick={() => pay(payFor, 'card')}>{tr('Pay with Visa / Mastercard')}</Button>}
