@@ -4,33 +4,35 @@ import { useSession, useRealtime } from '../lib/session.jsx';
 import { Icon } from './icons.jsx';
 import { Avatar, cx } from './ui.jsx';
 import { date } from '../lib/format.js';
+import { useT, LangToggle } from '../lib/i18n.jsx';
 
 function Rail({ items, footer, brand, badge }) {
+  const tr = useT();
   const [open, setOpen] = useState(false);
   const loc = useLocation();
   return (
     <>
       <div className="lg:hidden sticky top-0 z-30 h-12 shrink-0 bg-ink text-white flex items-center gap-2 px-2">
-        <button className="w-9 h-9 rounded-md grid place-items-center hover:bg-white/10" aria-label="Open menu" onClick={() => setOpen(true)}>
+        <button className="w-9 h-9 rounded-md grid place-items-center hover:bg-white/10" aria-label={tr('Open menu')} onClick={() => setOpen(true)}>
           <Icon name="more" />
         </button>
         <img src="/brand/wappflow-logo-white.png" alt={brand} className="h-6 w-auto" />
       </div>
       {open && <div className="lg:hidden fixed inset-0 z-40 bg-ink/40" onClick={() => setOpen(false)} />}
-      <aside className={cx('fixed lg:sticky top-0 z-50 h-screen w-[232px] shrink-0 bg-ink text-white/80 flex flex-col transition-transform lg:translate-x-0', open ? 'translate-x-0' : '-translate-x-full')}>
+      <aside className={cx('fixed lg:sticky top-0 start-0 z-50 h-screen w-[232px] shrink-0 bg-ink text-white/80 flex flex-col transition-transform', !open && 'max-lg:-translate-x-full max-lg:rtl:translate-x-full')}>
         <div className="flex items-center gap-2.5 px-5 h-16 text-white">
           <img src="/brand/wappflow-logo-white.png" alt={brand} className="h-7 w-auto" />
-          {badge && <span className="text-[11px] font-semibold rounded px-1.5 py-0.5 bg-white/10 text-white/80">{badge}</span>}
+          {badge && <span className="text-[11px] font-semibold rounded px-1.5 py-0.5 bg-white/10 text-white/80">{tr(badge)}</span>}
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5" onClick={() => setOpen(false)}>
           {items.map((it) => it.section ? (
-            <p key={it.section} className="px-3 pt-5 pb-1 text-[12px] text-white/40">{it.section}</p>
+            <p key={it.section} className="px-3 pt-5 pb-1 text-[12px] text-white/40">{tr(it.section)}</p>
           ) : (
             <NavLink key={it.to} to={it.to} end={it.end}
               className={({ isActive }) => cx('flex items-center gap-3 px-3 py-2 rounded-md transition-colors',
                 isActive || (it.match && loc.pathname.startsWith(it.match)) ? 'bg-white/10 text-white' : 'hover:bg-white/5 hover:text-white')}>
               <Icon name={it.icon} size={18} />
-              <span className="flex-1">{it.label}</span>
+              <span className="flex-1">{tr(it.label)}</span>
               {!!it.badge && <span className="min-w-5 h-5 px-1.5 rounded-full bg-signal text-white text-[11px] font-semibold grid place-items-center">{it.badge}</span>}
             </NavLink>
           ))}
@@ -42,20 +44,23 @@ function Rail({ items, footer, brand, badge }) {
 }
 
 function UserFooter() {
+  const tr = useT();
   const { me, logout } = useSession();
   return (
     <div className="border-t border-white/10 p-3 flex items-center gap-2.5">
       <Avatar name={me.user.name} size={32} />
       <div className="min-w-0 flex-1">
         <p className="text-white text-[13px] font-medium truncate">{me.user.name}</p>
-        <p className="text-white/50 text-[12px] truncate">{me.tenant?.name || 'Platform admin'}</p>
+        <p className="text-white/50 text-[12px] truncate">{me.tenant?.name || tr('Platform admin')}</p>
       </div>
-      <button onClick={logout} className="p-1.5 rounded hover:bg-white/10" aria-label="Sign out" title="Sign out"><Icon name="logout" size={17} /></button>
+      <LangToggle className="px-1.5 py-1 rounded text-[12px] font-medium text-white/70 hover:text-white hover:bg-white/10" />
+      <button onClick={logout} className="p-1.5 rounded hover:bg-white/10 rtl:-scale-x-100" aria-label={tr('Sign out')} title={tr('Sign out')}><Icon name="logout" size={17} /></button>
     </div>
   );
 }
 
 function StatusBanner() {
+  const tr = useT();
   const { me, stopImpersonating } = useSession();
   const impersonatedBy = me?.impersonatedBy;
   const t = me?.tenant;
@@ -63,20 +68,20 @@ function StatusBanner() {
     <>
       {impersonatedBy && (
         <div className="bg-ink-2 text-white text-[13px] px-6 py-2 flex items-center justify-between gap-3">
-          <span>You are viewing <b>{t?.name}</b> as its owner (support mode).</span>
-          <button className="underline" onClick={stopImpersonating}>Back to admin</button>
+          <span>{tr('You are viewing {name} as its owner (support mode).', { name: t?.name })}</span>
+          <button className="underline" onClick={stopImpersonating}>{tr('Back to admin')}</button>
         </div>
       )}
       {t?.status === 'trial' && (
         <div className="bg-amber-wash text-[#7a4d0c] text-[13px] px-6 py-2 flex items-center justify-between gap-3">
-          <span>Free trial ends {date(t.trial_ends_at)}. Choose a plan to keep your number and contacts active.</span>
-          <Link to="/app/billing" className="font-semibold underline">Choose a plan</Link>
+          <span>{tr('Free trial ends {date}. Choose a plan to keep your number and contacts active.', { date: date(t.trial_ends_at) })}</span>
+          <Link to="/app/billing" className="font-semibold underline">{tr('Choose a plan')}</Link>
         </div>
       )}
       {['past_due', 'suspended'].includes(t?.status) && (
         <div className="bg-danger text-white text-[13px] px-6 py-2 flex items-center justify-between gap-3">
-          <span>{t.status === 'suspended' ? 'Workspace suspended: messaging is paused until the open invoice is paid.' : 'Your subscription renewal is unpaid.'}</span>
-          <Link to="/app/billing" className="font-semibold underline">Pay invoice</Link>
+          <span>{t.status === 'suspended' ? tr('Workspace suspended: messaging is paused until the open invoice is paid.') : tr('Your subscription renewal is unpaid.')}</span>
+          <Link to="/app/billing" className="font-semibold underline">{tr('Pay invoice')}</Link>
         </div>
       )}
     </>

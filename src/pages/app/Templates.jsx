@@ -3,6 +3,7 @@ import { del, post, useApi } from '../../lib/api.js';
 import { Button, Confirm, Empty, Field, IconButton, Input, Loading, Modal, PageHeader, Select, StatusBadge, Textarea, cx, useAction } from '../../components/ui.jsx';
 import { Icon } from '../../components/icons.jsx';
 import { isRtl } from '../../lib/format.js';
+import { useT } from '../../lib/i18n.jsx';
 
 // ---------- shared helpers used by inbox, campaigns and automations ----------
 const varCount = (text) => (String(text || '').match(/\{\{\d+\}\}/g) || []).length;
@@ -51,6 +52,7 @@ function ParamInput({ param, onChange, fields }) {
 
 /** Fill {{1}}, {{2}}… of a template with contact data, custom fields or fixed text. */
 export function TemplateVariables({ template, value, onChange, extraFields = [] }) {
+  const tr = useT();
   const fields = [...CONTACT_FIELDS, ...extraFields];
   const { header, buttons } = templateParts(template);
   const setList = (key, i, p) => { const arr = [...(value[key] || [])]; arr[i] = p; onChange({ ...value, [key]: arr }); };
@@ -58,12 +60,12 @@ export function TemplateVariables({ template, value, onChange, extraFields = [] 
     <div className="space-y-3">
       <TemplatePreview template={template} />
       {['IMAGE', 'VIDEO', 'DOCUMENT'].includes(header?.format) && (
-        <Field label={`Header ${header.format.toLowerCase()} link`}><Input placeholder="https://…" value={value.headerMedia || ''} onChange={(e) => onChange({ ...value, headerMedia: e.target.value })} /></Field>
+        <Field label={`Header ${header.format.toLowerCase()} link`}><Input placeholder={tr('https://…')} value={value.headerMedia || ''} onChange={(e) => onChange({ ...value, headerMedia: e.target.value })} /></Field>
       )}
       {(value.header || []).map((p, i) => <Field key={`h${i}`} label={`Header {{${i + 1}}}`}><ParamInput param={p} fields={fields} onChange={(x) => setList('header', i, x)} /></Field>)}
       {(value.body || []).map((p, i) => <Field key={`b${i}`} label={`Body {{${i + 1}}}`}><ParamInput param={p} fields={fields} onChange={(x) => setList('body', i, x)} /></Field>)}
-      {(value.buttons || []).map((p, i) => <Field key={`u${i}`} label={`Link suffix for "${buttons[p.index]?.text}"`}><ParamInput param={p} fields={fields} onChange={(x) => setList('buttons', i, x)} /></Field>)}
-      {!(value.header?.length || value.body?.length || value.buttons?.length || 'headerMedia' in value) && <p className="text-ink-3 text-[13px]">This template has no variables.</p>}
+      {(value.buttons || []).map((p, i) => <Field key={`u${i}`} label={tr('Link suffix for "{text}"', { text: buttons[p.index]?.text })}><ParamInput param={p} fields={fields} onChange={(x) => setList('buttons', i, x)} /></Field>)}
+      {!(value.header?.length || value.body?.length || value.buttons?.length || 'headerMedia' in value) && <p className="text-ink-3 text-[13px]">{tr('This template has no variables.')}</p>}
     </div>
   );
 }
@@ -104,6 +106,7 @@ const LANGS = [
 ];
 
 function CreateTemplate({ open, onClose, onCreated }) {
+  const tr = useT();
   const [f, setF] = useState({ name: '', category: 'MARKETING', language: 'en', headerFormat: 'NONE', headerText: '', body: '', footer: '', buttonType: 'NONE', buttons: [{ text: '' }], examples: [] });
   const [run, busy] = useAction();
   const set = (k, v) => setF((x) => ({ ...x, [k]: v }));
@@ -127,12 +130,12 @@ function CreateTemplate({ open, onClose, onCreated }) {
   }, 'Template submitted to WhatsApp for review');
 
   return (
-    <Modal open={open} onClose={onClose} title="New message template" width={920}
-      footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" loading={busy} disabled={!f.name || !f.body} onClick={submit}>Submit for review</Button></>}>
+    <Modal open={open} onClose={onClose} title={tr('New message template')} width={920}
+      footer={<><Button onClick={onClose}>{tr('Cancel')}</Button><Button variant="primary" loading={busy} disabled={!f.name || !f.body} onClick={submit}>{tr('Submit for review')}</Button></>}>
       <div className="grid md:grid-cols-[1fr_340px] gap-6">
         <div className="space-y-4">
           <div className="grid sm:grid-cols-3 gap-3">
-            <Field label="Name" hint="Lowercase and underscores" className="sm:col-span-3"><Input value={f.name} placeholder="eid_offer_2026" onChange={(e) => set('name', e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'))} /></Field>
+            <Field label="Name" hint="Lowercase and underscores" className="sm:col-span-3"><Input value={f.name} placeholder={tr('eid_offer_2026')} onChange={(e) => set('name', e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'))} /></Field>
             <Field label="Category"><Select value={f.category} onChange={(e) => set('category', e.target.value)} options={[{ value: 'MARKETING', label: 'Marketing' }, { value: 'UTILITY', label: 'Utility (orders, updates)' }, { value: 'AUTHENTICATION', label: 'Authentication' }]} /></Field>
             <Field label="Language"><Select value={f.language} onChange={(e) => set('language', e.target.value)} options={LANGS} /></Field>
             <Field label="Header"><Select value={f.headerFormat} onChange={(e) => set('headerFormat', e.target.value)} options={[{ value: 'NONE', label: 'None' }, { value: 'TEXT', label: 'Text' }, { value: 'IMAGE', label: 'Image' }, { value: 'VIDEO', label: 'Video' }, { value: 'DOCUMENT', label: 'Document' }]} /></Field>
@@ -140,34 +143,34 @@ function CreateTemplate({ open, onClose, onCreated }) {
           {f.headerFormat === 'TEXT' && <Field label="Header text"><Input dir="auto" maxLength={60} value={f.headerText} onChange={(e) => set('headerText', e.target.value)} /></Field>}
           <Field label="Body" hint="Use {{1}}, {{2}} for personal details like the customer's name">
             <Textarea rows={5} dir="auto" maxLength={1024} value={f.body} onChange={(e) => set('body', e.target.value)} />
-            <button type="button" className="text-[13px] text-signal-deep font-medium mt-1" onClick={() => set('body', `${f.body}{{${vars + 1}}}`)}>+ Add variable</button>
+            <button type="button" className="text-[13px] text-signal-deep font-medium mt-1" onClick={() => set('body', `${f.body}{{${vars + 1}}}`)}>{tr('+ Add variable')}</button>
           </Field>
           {vars > 0 && (
             <div className="grid sm:grid-cols-2 gap-3">
               {Array.from({ length: vars }, (_, i) => (
-                <Field key={i} label={`Example for {{${i + 1}}}`} hint="Meta reviewers see this">
+                <Field key={i} label={tr('Example for {v}', { v: `{{${i + 1}}}` })} hint="Meta reviewers see this">
                   <Input value={f.examples[i] || ''} onChange={(e) => { const ex = [...f.examples]; ex[i] = e.target.value; set('examples', ex); }} />
                 </Field>
               ))}
             </div>
           )}
-          <Field label="Footer (optional)"><Input dir="auto" maxLength={60} value={f.footer} placeholder="Reply STOP to unsubscribe" onChange={(e) => set('footer', e.target.value)} /></Field>
+          <Field label="Footer (optional)"><Input dir="auto" maxLength={60} value={f.footer} placeholder={tr('Reply STOP to unsubscribe')} onChange={(e) => set('footer', e.target.value)} /></Field>
           <Field label="Buttons">
             <Select value={f.buttonType} onChange={(e) => set('buttonType', e.target.value)} options={[{ value: 'NONE', label: 'None' }, { value: 'QUICK_REPLY', label: 'Quick replies (up to 3)' }, { value: 'CTA', label: 'Website or call button' }]} />
           </Field>
           {f.buttonType !== 'NONE' && f.buttons.map((b, i) => (
             <div key={i} className="flex gap-2">
-              <Input placeholder="Button text" maxLength={25} value={b.text} onChange={(e) => { const x = [...f.buttons]; x[i] = { ...b, text: e.target.value }; set('buttons', x); }} />
-              {f.buttonType === 'CTA' && <Input placeholder="https://… or +965…" value={b.url || b.phone || ''} onChange={(e) => { const v = e.target.value; const x = [...f.buttons]; x[i] = { text: b.text, ...(v.startsWith('+') ? { phone: v } : { url: v }) }; set('buttons', x); }} />}
+              <Input placeholder={tr('Button text')} maxLength={25} value={b.text} onChange={(e) => { const x = [...f.buttons]; x[i] = { ...b, text: e.target.value }; set('buttons', x); }} />
+              {f.buttonType === 'CTA' && <Input placeholder={tr('https://… or +965…')} value={b.url || b.phone || ''} onChange={(e) => { const v = e.target.value; const x = [...f.buttons]; x[i] = { text: b.text, ...(v.startsWith('+') ? { phone: v } : { url: v }) }; set('buttons', x); }} />}
               <IconButton icon="trash" label="Remove button" onClick={() => set('buttons', f.buttons.filter((_, j) => j !== i))} />
             </div>
           ))}
-          {f.buttonType !== 'NONE' && f.buttons.length < (f.buttonType === 'CTA' ? 2 : 3) && <Button size="sm" icon="plus" onClick={() => set('buttons', [...f.buttons, { text: '' }])}>Add button</Button>}
+          {f.buttonType !== 'NONE' && f.buttons.length < (f.buttonType === 'CTA' ? 2 : 3) && <Button size="sm" icon="plus" onClick={() => set('buttons', [...f.buttons, { text: '' }])}>{tr('Add button')}</Button>}
         </div>
         <div>
-          <p className="text-[13px] font-medium mb-1.5">Preview</p>
+          <p className="text-[13px] font-medium mb-1.5">{tr('Preview')}</p>
           <TemplatePreview template={{ components }} />
-          <p className="text-ink-3 text-[12px] mt-3">Meta usually reviews templates within minutes, sometimes up to 24 hours. Marketing templates are charged at a higher WhatsApp rate than utility ones.</p>
+          <p className="text-ink-3 text-[12px] mt-3">{tr('Meta usually reviews templates within minutes, sometimes up to 24 hours. Marketing templates are charged at a higher WhatsApp rate than utility ones.')}</p>
         </div>
       </div>
     </Modal>
@@ -175,6 +178,7 @@ function CreateTemplate({ open, onClose, onCreated }) {
 }
 
 export default function Templates() {
+  const tr = useT();
   const { data, loading, reload } = useApi('/api/app/templates');
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState('ALL');
@@ -184,20 +188,20 @@ export default function Templates() {
 
   return (
     <>
-      <PageHeader title="Templates" subtitle="Pre-approved messages for campaigns, order updates and restarting conversations after 24 hours."
+      <PageHeader title={tr('Templates')} subtitle="Pre-approved messages for campaigns, order updates and restarting conversations after 24 hours."
         actions={<>
-          <Button icon="refresh" loading={busy} onClick={() => run(async () => { const r = await post('/api/app/templates/sync'); await reload(); return r; }, 'Synced with WhatsApp')}>Sync from WhatsApp</Button>
-          <Button variant="primary" icon="plus" onClick={() => setOpen(true)}>New template</Button>
+          <Button icon="refresh" loading={busy} onClick={() => run(async () => { const r = await post('/api/app/templates/sync'); await reload(); return r; }, 'Synced with WhatsApp')}>{tr('Sync from WhatsApp')}</Button>
+          <Button variant="primary" icon="plus" onClick={() => setOpen(true)}>{tr('New template')}</Button>
         </>} />
       <div className="flex gap-1 mb-4">
         {['ALL', 'APPROVED', 'PENDING', 'REJECTED'].map((s) => (
           <button key={s} onClick={() => setFilter(s)} className={cx('px-3 py-1 rounded-md text-[13px] font-medium', filter === s ? 'bg-ink text-white' : 'text-ink-3 hover:bg-white')}>
-            {s === 'ALL' ? 'All' : s.charAt(0) + s.slice(1).toLowerCase()}
+            {tr(s === 'ALL' ? 'All' : s.charAt(0) + s.slice(1).toLowerCase())}
           </button>
         ))}
       </div>
       {loading ? <Loading /> : !rows.length ? (
-        <div className="bg-white border border-line rounded-lg"><Empty icon="file" title="No templates yet" body="Create one here, or sync templates you already made in WhatsApp Manager." action={<Button variant="primary" icon="plus" onClick={() => setOpen(true)}>New template</Button>} /></div>
+        <div className="bg-white border border-line rounded-lg"><Empty icon="file" title={tr('No templates yet')} body="Create one here, or sync templates you already made in WhatsApp Manager." action={<Button variant="primary" icon="plus" onClick={() => setOpen(true)}>{tr('New template')}</Button>} /></div>
       ) : (
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {rows.map((t) => (
@@ -205,18 +209,18 @@ export default function Templates() {
               <div className="px-4 pt-3 pb-2 flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="font-semibold truncate font-mono text-[13px]">{t.name}</p>
-                  <p className="text-ink-3 text-[12px] mt-0.5">{t.category.charAt(0) + t.category.slice(1).toLowerCase()} · {t.language}</p>
+                  <p className="text-ink-3 text-[12px] mt-0.5">{tr(t.category.charAt(0) + t.category.slice(1).toLowerCase())} · {t.language}</p>
                 </div>
                 <div className="flex items-center gap-1"><StatusBadge status={t.status} /><IconButton icon="trash" label="Delete template" onClick={() => setToDelete(t)} /></div>
               </div>
               <div className="px-4 pb-4 flex-1"><TemplatePreview template={t} compact /></div>
-              {t.rejected_reason && <p className="px-4 pb-3 text-danger text-[12px]">Rejected: {t.rejected_reason}</p>}
+              {t.rejected_reason && <p className="px-4 pb-3 text-danger text-[12px]">{tr('Rejected:')} {t.rejected_reason}</p>}
             </article>
           ))}
         </div>
       )}
       <CreateTemplate open={open} onClose={() => setOpen(false)} onCreated={() => { setOpen(false); reload(); }} />
-      <Confirm open={!!toDelete} title="Delete template?" body={`"${toDelete?.name}" will also be deleted from WhatsApp. Campaigns already sent are not affected.`}
+      <Confirm open={!!toDelete} title={tr('Delete template?')} body={tr('"{name}" will also be deleted from WhatsApp. Campaigns already sent are not affected.', { name: toDelete?.name })}
         busy={busy} onClose={() => setToDelete(null)} onConfirm={() => run(async () => { await del(`/api/app/templates/${toDelete.id}`); setToDelete(null); reload(); }, 'Template deleted')} />
     </>
   );

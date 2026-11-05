@@ -3,11 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './index.css';
 import { SessionProvider, useSession } from './lib/session.jsx';
+import { LangProvider } from './lib/i18n.jsx';
 import { ToastProvider, Loading } from './components/ui.jsx';
 import { AppShell, AdminShell } from './components/Shell.jsx';
 import { Login, Signup } from './pages/Auth.jsx';
 
-const Landing = lazy(() => import('./pages/site/Landing.jsx'));
 const Dashboard = lazy(() => import('./pages/app/Dashboard.jsx'));
 const Inbox = lazy(() => import('./pages/app/Inbox.jsx'));
 const Contacts = lazy(() => import('./pages/app/Contacts.jsx'));
@@ -37,15 +37,24 @@ function Guard({ admin, children }) {
   return children;
 }
 
+// The public website lives in the wappflow-web repo; here "/" just routes signed-in users.
+function Home() {
+  const { loading, me } = useSession();
+  if (loading) return <Loading />;
+  if (!me) return <Navigate to="/login" replace />;
+  return <Navigate to={me.user.role === 'superadmin' ? '/admin' : '/app'} replace />;
+}
+
 const S = ({ children }) => <Suspense fallback={<Loading />}>{children}</Suspense>;
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
+      <LangProvider>
       <ToastProvider>
         <SessionProvider>
           <Routes>
-            <Route path="/" element={<S><Landing /></S>} />
+            <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/app" element={<Guard><AppShell /></Guard>}>
@@ -76,6 +85,7 @@ createRoot(document.getElementById('root')).render(
           </Routes>
         </SessionProvider>
       </ToastProvider>
+      </LangProvider>
     </BrowserRouter>
   </StrictMode>,
 );

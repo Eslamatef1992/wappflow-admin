@@ -5,6 +5,7 @@ import { Button, Field, Input, Loading, PageHeader, Panel, Select, cx, useAction
 import { Icon } from '../../components/icons.jsx';
 import { TemplateVariables, emptyVariables } from './Templates.jsx';
 import { num } from '../../lib/format.js';
+import { useT } from '../../lib/i18n.jsx';
 
 function Step({ n, title, children, done }) {
   return (
@@ -23,6 +24,7 @@ function Step({ n, title, children, done }) {
 }
 
 export default function CampaignEditor() {
+  const tr = useT();
   const { id } = useParams();
   const nav = useNavigate();
   const templates = useApi('/api/app/templates?status=APPROVED');
@@ -64,7 +66,7 @@ export default function CampaignEditor() {
     const x = await save();
     await post(`/api/app/campaigns/${x.id}/launch`, { scheduledAt: body().scheduledAt });
     nav(`/app/campaigns/${x.id}`);
-  }, c.when === 'later' ? 'Campaign scheduled' : 'Campaign is sending');
+  }, c.when === 'later' ? tr('Campaign scheduled') : tr('Campaign is sending'));
 
   if (!loaded || templates.loading) return <Loading />;
   const tagList = tags.data || [];
@@ -72,26 +74,26 @@ export default function CampaignEditor() {
 
   return (
     <div className="max-w-[860px]">
-      <PageHeader title={id ? 'Edit campaign' : 'New campaign'} back={<Link to="/app/campaigns" className="text-[13px] text-ink-3 hover:text-ink inline-flex items-center gap-1 mb-2"><Icon name="arrowLeft" size={14} />Campaigns</Link>} />
+      <PageHeader title={id ? tr('Edit campaign') : tr('New campaign')} back={<Link to="/app/campaigns" className="text-[13px] text-ink-3 hover:text-ink inline-flex items-center gap-1 mb-2"><Icon name="arrowLeft" size={14} className="rtl:-scale-x-100" />{tr('Campaigns')}</Link>} />
 
-      <Step n={1} title="Message" done={!!c.name && !!template}>
+      <Step n={1} title={tr('Message')} done={!!c.name && !!template}>
         <div className="grid sm:grid-cols-2 gap-3">
-          <Field label="Campaign name" hint="Only your team sees this"><Input value={c.name} placeholder="Eid weekend offer" onChange={(e) => setC({ ...c, name: e.target.value })} /></Field>
+          <Field label="Campaign name" hint="Only your team sees this"><Input value={c.name} placeholder={tr('Eid weekend offer')} onChange={(e) => setC({ ...c, name: e.target.value })} /></Field>
           <Field label="Template">
-            <Select value={c.templateId} onChange={(e) => setTemplate(e.target.value)} placeholder="Choose an approved template"
+            <Select value={c.templateId} onChange={(e) => setTemplate(e.target.value)} placeholder={tr('Choose an approved template')}
               options={(templates.data || []).map((t) => ({ value: t.id, label: `${t.name} (${t.language})` }))} />
           </Field>
           {(numbers.data?.data?.length || 0) > 1 && (
-            <Field label="Send from"><Select value={c.numberId} onChange={(e) => setC({ ...c, numberId: e.target.value })} placeholder="Default number" options={numbers.data.data.map((n) => ({ value: n.id, label: `${n.label} ${n.display_phone}` }))} /></Field>
+            <Field label="Send from"><Select value={c.numberId} onChange={(e) => setC({ ...c, numberId: e.target.value })} placeholder={tr('Default number')} options={numbers.data.data.map((n) => ({ value: n.id, label: `${n.label} ${n.display_phone}` }))} /></Field>
           )}
         </div>
-        {!templates.data?.length && <p className="text-[13px] text-ink-3 mt-2">You need an approved template first. <Link to="/app/templates" className="underline">Create one</Link>.</p>}
+        {!templates.data?.length && <p className="text-[13px] text-ink-3 mt-2">{tr('You need an approved template first.')} <Link to="/app/templates" className="underline">{tr('Create one')}</Link>.</p>}
       </Step>
 
-      <Step n={2} title="Audience" done={!!audienceChosen && count > 0}>
+      <Step n={2} title={tr('Audience')} done={!!audienceChosen && count > 0}>
         <div className="flex flex-wrap gap-2 mb-3">
           <button type="button" onClick={() => setC({ ...c, audience: { ...c.audience, all: true, tagIds: [] } })}
-            className={cx('rounded-md border px-3 py-1.5 text-[13px] font-medium', c.audience.all ? 'border-ink bg-ink text-white' : 'border-line bg-white')}>All opted-in contacts</button>
+            className={cx('rounded-md border px-3 py-1.5 text-[13px] font-medium', c.audience.all ? 'border-ink bg-ink text-white' : 'border-line bg-white')}>{tr('All opted-in contacts')}</button>
           {tagList.map((t) => (
             <button key={t.id} type="button" onClick={() => toggleTag('tagIds', t.id)}
               className={cx('rounded-md border px-3 py-1.5 text-[13px] font-medium', c.audience.tagIds?.includes(t.id) ? 'border-ink bg-ink text-white' : 'border-line bg-white')}>
@@ -101,7 +103,7 @@ export default function CampaignEditor() {
         </div>
         {tagList.length > 0 && (
           <details className="mb-3">
-            <summary className="text-[13px] text-ink-3 cursor-pointer">Exclude tags</summary>
+            <summary className="text-[13px] text-ink-3 cursor-pointer">{tr('Exclude tags')}</summary>
             <div className="flex flex-wrap gap-2 mt-2">
               {tagList.map((t) => (
                 <button key={t.id} type="button" onClick={() => toggleTag('excludeTagIds', t.id)}
@@ -110,27 +112,27 @@ export default function CampaignEditor() {
             </div>
           </details>
         )}
-        <p className="text-[13px]"><b className="tabular-nums">{count == null ? '…' : num(count)}</b> people will receive this. Contacts who replied STOP are always skipped.</p>
+        <p className="text-[13px]">{tr('{n} people will receive this. Contacts who replied STOP are always skipped.', { n: count == null ? '…' : num(count) })}</p>
       </Step>
 
-      <Step n={3} title="Personalise" done={!!template}>
-        {template ? <TemplateVariables template={template} value={c.variables} onChange={(v) => setC({ ...c, variables: v })} /> : <p className="text-ink-3 text-[13px]">Choose a template to fill in names and details.</p>}
+      <Step n={3} title={tr('Personalise')} done={!!template}>
+        {template ? <TemplateVariables template={template} value={c.variables} onChange={(v) => setC({ ...c, variables: v })} /> : <p className="text-ink-3 text-[13px]">{tr('Choose a template to fill in names and details.')}</p>}
       </Step>
 
-      <Step n={4} title="Send" done={false}>
+      <Step n={4} title={tr('Send')} done={false}>
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex gap-2">
             {[['now', 'Send now'], ['later', 'Schedule']].map(([v, l]) => (
-              <button key={v} type="button" onClick={() => setC({ ...c, when: v })} className={cx('rounded-md border px-3 py-1.5 text-[13px] font-medium', c.when === v ? 'border-ink bg-ink text-white' : 'border-line bg-white')}>{l}</button>
+              <button key={v} type="button" onClick={() => setC({ ...c, when: v })} className={cx('rounded-md border px-3 py-1.5 text-[13px] font-medium', c.when === v ? 'border-ink bg-ink text-white' : 'border-line bg-white')}>{tr(l)}</button>
             ))}
           </div>
           {c.when === 'later' && <Field label="Date and time (your timezone)"><Input type="datetime-local" value={c.scheduledAt} onChange={(e) => setC({ ...c, scheduledAt: e.target.value })} /></Field>}
         </div>
         <div className="flex gap-2 mt-5">
           <Button variant="primary" icon={c.when === 'later' ? 'clock' : 'send'} loading={busy} disabled={!template || !audienceChosen || !count || (c.when === 'later' && !c.scheduledAt)} onClick={launch}>
-            {c.when === 'later' ? 'Schedule campaign' : `Send to ${count ? num(count) : ''} people`}
+            {c.when === 'later' ? tr('Schedule campaign') : tr('Send to {n} people', { n: count ? num(count) : '' })}
           </Button>
-          <Button loading={busy} onClick={saveDraft}>Save draft</Button>
+          <Button loading={busy} onClick={saveDraft}>{tr('Save draft')}</Button>
         </div>
       </Step>
     </div>

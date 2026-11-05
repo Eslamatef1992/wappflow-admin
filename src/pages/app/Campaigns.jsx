@@ -3,6 +3,7 @@ import { useApi } from '../../lib/api.js';
 import { useRealtime } from '../../lib/session.jsx';
 import { Button, Empty, Loading, PageHeader, StatusBadge, Table } from '../../components/ui.jsx';
 import { dateTime, num, pct } from '../../lib/format.js';
+import { useT } from '../../lib/i18n.jsx';
 
 export function Progress({ c }) {
   const total = c.total || 0;
@@ -22,17 +23,18 @@ export function Progress({ c }) {
 }
 
 export default function Campaigns() {
+  const tr = useT();
   const nav = useNavigate();
   const { data, loading, reload } = useApi('/api/app/campaigns');
   useRealtime((e) => { if (e.startsWith('campaign.')) reload(); });
   return (
     <>
-      <PageHeader title="Campaigns" subtitle="Send an approved template to a tagged group of customers, now or on a schedule."
-        actions={<Link to="/app/campaigns/new"><Button variant="primary" icon="plus">New campaign</Button></Link>} />
+      <PageHeader title={tr('Campaigns')} subtitle="Send an approved template to a tagged group of customers, now or on a schedule."
+        actions={<Link to="/app/campaigns/new"><Button variant="primary" icon="plus">{tr('New campaign')}</Button></Link>} />
       <div className="bg-white border border-line rounded-lg">
         {loading ? <Loading /> : (
           <Table rows={data}
-            empty={<Empty icon="megaphone" title="No campaigns yet" body="Announce an offer, a new collection or Eid opening hours to everyone who opted in." action={<Link to="/app/campaigns/new"><Button variant="primary">Create your first campaign</Button></Link>} />}
+            empty={<Empty icon="megaphone" title={tr('No campaigns yet')} body="Announce an offer, a new collection or Eid opening hours to everyone who opted in." action={<Link to="/app/campaigns/new"><Button variant="primary">{tr('Create your first campaign')}</Button></Link>} />}
             onRowClick={(c) => nav(c.status === 'draft' ? `/app/campaigns/${c.id}/edit` : `/app/campaigns/${c.id}`)}
             columns={[
               { label: 'Campaign', key: 'name', render: (c) => <div><p className="font-medium">{c.name}</p><p className="text-ink-3 text-[12px] font-mono">{c.template_name || 'No template'}</p></div> },

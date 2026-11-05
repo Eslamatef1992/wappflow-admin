@@ -6,10 +6,12 @@ import { Avatar, Badge, Button, Empty, Field, IconButton, Input, Loading, Modal,
 import { Icon } from '../../components/icons.jsx';
 import { ago, dateTime, money, phone, time, isRtl } from '../../lib/format.js';
 import { TemplateVariables, emptyVariables } from './Templates.jsx';
+import { useT } from '../../lib/i18n.jsx';
 
 // ---------------- 24-hour window meter ----------------
 // WhatsApp only allows free-form replies within 24h of the customer's last message.
 function WindowMeter({ expiresAt }) {
+  const tr = useT();
   const [nowTs, setNow] = useState(Date.now());
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(t); }, []);
   const left = expiresAt ? expiresAt - nowTs : 0;
@@ -19,14 +21,14 @@ function WindowMeter({ expiresAt }) {
   const urgent = open && left < 3 * 3600_000;
   const h = Math.floor(left / 3600_000); const m = Math.floor((left % 3600_000) / 60_000);
   return (
-    <div className="flex items-center gap-2.5" title="Free-form replies are allowed for 24 hours after the customer's last message">
+    <div className="flex items-center gap-2.5" title={tr('Free-form replies are allowed for 24 hours after the customer\'s last message')}>
       <svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true" className="-rotate-90">
         <circle cx="19" cy="19" r={r} fill="none" stroke="var(--color-line)" strokeWidth="4" />
         {open && <circle cx="19" cy="19" r={r} fill="none" stroke={urgent ? 'var(--color-amber)' : 'var(--color-signal)'} strokeWidth="4" strokeLinecap="round" strokeDasharray={`${c * ratio} ${c}`} />}
       </svg>
       <div className="leading-tight">
-        <p className={cx('text-[13px] font-semibold tabular-nums', !open && 'text-ink-3', urgent && 'text-[#9a6210]')}>{open ? `${h}h ${String(m).padStart(2, '0')}m left` : 'Window closed'}</p>
-        <p className="text-[12px] text-ink-3">{open ? 'to reply freely' : 'Templates only'}</p>
+        <p className={cx('text-[13px] font-semibold tabular-nums', !open && 'text-ink-3', urgent && 'text-[#9a6210]')}>{open ? tr('{h}h {m}m left', { h, m: String(m).padStart(2, '0') }) : tr('Window closed')}</p>
+        <p className="text-[12px] text-ink-3">{open ? tr('to reply freely') : tr('Templates only')}</p>
       </div>
     </div>
   );
@@ -57,6 +59,7 @@ function MediaImage({ messageId, caption }) {
 }
 
 function MessageBody({ m, onTap }) {
+  const tr = useT();
   const c = m.content || {};
   if (m.type === 'image' && m.direction === 'in') return <><MediaImage messageId={m.id} caption={c.image?.caption} />{c.image?.caption && <p>{c.image.caption}</p>}</>;
   if (m.type === 'image' && c.image?.link) return <><img src={c.image.link} alt={c.image.caption || ''} className="rounded-md max-h-72 mb-1" />{c.image.caption && <p>{c.image.caption}</p>}</>;
@@ -69,7 +72,7 @@ function MessageBody({ m, onTap }) {
         <p className="whitespace-pre-wrap" dir="auto">{i.body?.text}</p>
         {i.footer?.text && <p className="text-[12px] text-ink-3 mt-1">{i.footer.text}</p>}
         <div className="mt-2 -mx-1 grid gap-1">
-          {i.type === 'list' && <p className="text-[12px] text-ink-3 px-1">List · {i.action?.button}</p>}
+          {i.type === 'list' && <p className="text-[12px] text-ink-3 px-1">{tr('List')} · {i.action?.button}</p>}
           {opts?.map((o) => (
             <button key={o.id} type="button" disabled={!onTap} onClick={() => onTap?.(o, i.type)}
               className={cx('rounded-md bg-white/70 border border-black/5 px-2 py-1.5 text-[13px] text-[#2f8ae0] font-medium text-center', onTap && 'hover:bg-white')}
@@ -94,11 +97,12 @@ function MessageBody({ m, onTap }) {
 }
 
 function Bubble({ m, onTap }) {
+  const tr = useT();
   if (m.direction === 'note') {
     return (
       <div className="flex justify-center my-2">
         <div className="bg-note border border-[#f1e2a6] rounded-md px-3 py-2 max-w-[80%] text-[13px]">
-          <p className="text-[12px] text-[#8a6d12] font-medium mb-0.5 flex items-center gap-1"><Icon name="note" size={12} />Internal note · {m.sender_name}</p>
+          <p className="text-[12px] text-[#8a6d12] font-medium mb-0.5 flex items-center gap-1"><Icon name="note" size={12} />{tr('Internal note')} · {m.sender_name}</p>
           <p className="whitespace-pre-wrap">{m.body}</p>
         </div>
       </div>
@@ -108,10 +112,10 @@ function Bubble({ m, onTap }) {
   return (
     <div className={cx('flex my-1', out ? 'justify-end' : 'justify-start')}>
       <div className={cx('rounded-xl px-3 py-2 max-w-[78%] sm:max-w-[65%] shadow-[0_1px_0_rgba(0,0,0,.06)] text-[14px]',
-        out ? 'bg-bubble-out rounded-tr-sm' : 'bg-white rounded-tl-sm', isRtl(m.body) && 'text-right')}>
+        out ? 'bg-bubble-out rounded-se-sm' : 'bg-white rounded-ss-sm', isRtl(m.body) && 'text-right')}>
         <MessageBody m={m} onTap={onTap} />
         <div className="flex items-center justify-end gap-1 mt-0.5 text-[11px] text-ink-3">
-          {out && (m.campaign_id ? <span>Campaign ·</span> : m.flow_id ? <span className="flex items-center gap-0.5"><Icon name="bot" size={11} />Bot ·</span> : m.sender_name ? <span>{m.sender_name} ·</span> : null)}
+          {out && (m.campaign_id ? <span>{tr('Campaign ·')}</span> : m.flow_id ? <span className="flex items-center gap-0.5"><Icon name="bot" size={11} />{tr('Bot ·')}</span> : m.sender_name ? <span>{m.sender_name} ·</span> : null)}
           <span>{time(m.created_at)}</span>
           {out && <Ticks status={m.status} />}
         </div>
@@ -123,6 +127,7 @@ function Bubble({ m, onTap }) {
 
 // ---------------- composer ----------------
 function Composer({ conv, onSent, quickReplies, templates }) {
+  const tr = useT();
   const [mode, setMode] = useState('reply'); // reply | note
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -150,10 +155,10 @@ function Composer({ conv, onSent, quickReplies, templates }) {
     return (
       <div className="border-t border-line bg-white p-4">
         <div className="flex flex-wrap items-center gap-3 justify-between">
-          <p className="text-ink-3 text-[13px] max-w-[52ch]">This customer hasn't written in the last 24 hours. WhatsApp requires an approved template to start the conversation again.</p>
+          <p className="text-ink-3 text-[13px] max-w-[52ch]">{tr('This customer hasn\'t written in the last 24 hours. WhatsApp requires an approved template to start the conversation again.')}</p>
           <div className="flex gap-2">
-            <Button variant="ghost" icon="note" onClick={() => setMode('note')}>Add note</Button>
-            <Button variant="primary" icon="file" onClick={() => setTplOpen(true)}>Send template</Button>
+            <Button variant="ghost" icon="note" onClick={() => setMode('note')}>{tr('Add note')}</Button>
+            <Button variant="primary" icon="file" onClick={() => setTplOpen(true)}>{tr('Send template')}</Button>
           </div>
         </div>
         <TemplateSender open={tplOpen} onClose={() => setTplOpen(false)} templates={templates} onSend={async (b) => { if (await send(b)) setTplOpen(false); }} busy={busy} />
@@ -166,15 +171,15 @@ function Composer({ conv, onSent, quickReplies, templates }) {
       <div className="flex gap-1 mb-2">
         {['reply', 'note'].map((m) => (
           <button key={m} type="button" onClick={() => setMode(m)} className={cx('px-2.5 py-1 rounded text-[13px] font-medium', mode === m ? 'bg-ink text-white' : 'text-ink-3 hover:text-ink')}>
-            {m === 'reply' ? 'Reply' : 'Internal note'}
+            {m === 'reply' ? tr('Reply') : tr('Internal note')}
           </button>
         ))}
       </div>
       <div className="relative">
         {matches.length > 0 && (
-          <div className="absolute bottom-full mb-2 left-0 right-0 bg-white border border-line rounded-md shadow-lg overflow-hidden z-10">
+          <div className="absolute bottom-full mb-2 start-0 end-0 bg-white border border-line rounded-md shadow-lg overflow-hidden z-10">
             {matches.map((q) => (
-              <button key={q.id} type="button" onClick={() => setText(q.body)} className="w-full text-left px-3 py-2 hover:bg-paper flex gap-3">
+              <button key={q.id} type="button" onClick={() => setText(q.body)} className="w-full text-start px-3 py-2 hover:bg-paper flex gap-3">
                 <span className="font-mono text-[12px] text-signal-deep shrink-0">/{q.shortcut}</span><span className="truncate text-ink-3">{q.body}</span>
               </button>
             ))}
@@ -190,9 +195,9 @@ function Composer({ conv, onSent, quickReplies, templates }) {
           <textarea ref={ref} rows={1} value={text} dir="auto"
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } }}
-            placeholder={mode === 'note' ? 'Only your team sees notes' : 'Type a message · "/" for quick replies'}
+            placeholder={mode === 'note' ? tr('Only your team sees notes') : tr('Type a message · "/" for quick replies')}
             className="field flex-1 max-h-40 min-h-[38px]" style={{ fieldSizing: 'content' }} />
-          <Button variant={mode === 'note' ? 'dark' : 'primary'} icon={mode === 'note' ? 'note' : 'send'} loading={busy} disabled={!text.trim()}>{mode === 'note' ? 'Save' : 'Send'}</Button>
+          <Button variant={mode === 'note' ? 'dark' : 'primary'} icon={mode === 'note' ? 'note' : 'send'} loading={busy} disabled={!text.trim()}>{mode === 'note' ? tr('Save') : tr('Send')}</Button>
         </div>
       </div>
       <AttachModal open={attach} onClose={() => setAttach(false)} onSend={async (b) => { if (await send(b)) setAttach(false); }} busy={busy} />
@@ -202,30 +207,32 @@ function Composer({ conv, onSent, quickReplies, templates }) {
 }
 
 function AttachModal({ open, onClose, onSend, busy }) {
+  const tr = useT();
   const [f, setF] = useState({ kind: 'image', url: '', caption: '', filename: '' });
   return (
-    <Modal open={open} onClose={onClose} title="Send a file"
-      footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" loading={busy} onClick={() => onSend({ type: 'media', ...f })}>Send</Button></>}>
+    <Modal open={open} onClose={onClose} title={tr('Send a file')}
+      footer={<><Button onClick={onClose}>{tr('Cancel')}</Button><Button variant="primary" loading={busy} onClick={() => onSend({ type: 'media', ...f })}>{tr('Send')}</Button></>}>
       <Field label="Type"><Select value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value })} options={[{ value: 'image', label: 'Image' }, { value: 'document', label: 'Document (PDF)' }, { value: 'video', label: 'Video' }, { value: 'audio', label: 'Audio' }]} /></Field>
-      <Field label="Public file link" hint="WhatsApp downloads the file from this link"><Input placeholder="https://…" value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} /></Field>
+      <Field label="Public file link" hint="WhatsApp downloads the file from this link"><Input placeholder={tr('https://…')} value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} /></Field>
       {f.kind !== 'audio' && <Field label="Caption"><Input value={f.caption} onChange={(e) => setF({ ...f, caption: e.target.value })} /></Field>}
-      {f.kind === 'document' && <Field label="File name"><Input placeholder="invoice.pdf" value={f.filename} onChange={(e) => setF({ ...f, filename: e.target.value })} /></Field>}
+      {f.kind === 'document' && <Field label="File name"><Input placeholder={tr('invoice.pdf')} value={f.filename} onChange={(e) => setF({ ...f, filename: e.target.value })} /></Field>}
     </Modal>
   );
 }
 
 function TemplateSender({ open, onClose, templates, onSend, busy }) {
+  const tr = useT();
   const approved = templates.filter((t) => t.status === 'APPROVED');
   const [id, setId] = useState('');
   const t = approved.find((x) => String(x.id) === String(id));
   const [vars, setVars] = useState({});
   useEffect(() => { if (t) setVars(emptyVariables(t)); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <Modal open={open} onClose={onClose} title="Send a template" width={600}
-      footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" disabled={!t} loading={busy} onClick={() => onSend({ type: 'template', templateId: t.id, variables: vars })}>Send template</Button></>}>
-      {!approved.length ? <p className="text-ink-3">No approved templates yet. Create one in <Link className="underline" to="/app/templates">Templates</Link>.</p> : (
+    <Modal open={open} onClose={onClose} title={tr('Send a template')} width={600}
+      footer={<><Button onClick={onClose}>{tr('Cancel')}</Button><Button variant="primary" disabled={!t} loading={busy} onClick={() => onSend({ type: 'template', templateId: t.id, variables: vars })}>{tr('Send template')}</Button></>}>
+      {!approved.length ? <p className="text-ink-3">{tr('No approved templates yet.')} <Link className="underline" to="/app/templates">{tr('Create one in Templates')}</Link></p> : (
         <>
-          <Field label="Template"><Select value={id} onChange={(e) => setId(e.target.value)} placeholder="Choose…" options={approved.map((x) => ({ value: x.id, label: `${x.name} (${x.language})` }))} /></Field>
+          <Field label="Template"><Select value={id} onChange={(e) => setId(e.target.value)} placeholder={tr('Choose…')} options={approved.map((x) => ({ value: x.id, label: `${x.name} (${x.language})` }))} /></Field>
           {t && <TemplateVariables template={t} value={vars} onChange={setVars} />}
         </>
       )}
@@ -235,46 +242,47 @@ function TemplateSender({ open, onClose, templates, onSend, busy }) {
 
 // ---------------- side panel ----------------
 function ContactPanel({ conv, team, onUpdate }) {
+  const tr = useT();
   const c = conv.contact;
   const session = conv.flow_session;
   return (
-    <aside className="hidden xl:block w-[300px] shrink-0 border-l border-line bg-white overflow-y-auto">
+    <aside className="hidden xl:block w-[300px] shrink-0 border-s border-line bg-white overflow-y-auto">
       <div className="p-5 text-center border-b border-line">
         <div className="flex justify-center"><Avatar name={c.name || c.wa_id} size={56} /></div>
         <p className="font-semibold mt-2">{c.name || 'Unknown'}</p>
         <p className="text-ink-3 text-[13px]" dir="ltr">{phone(c.wa_id)}</p>
-        {!c.opted_in && <Badge tone="red" className="mt-2">Opted out of marketing</Badge>}
+        {!c.opted_in && <Badge tone="red" className="mt-2">{tr('Opted out of marketing')}</Badge>}
       </div>
       <div className="p-5 space-y-5 text-[13px]">
         <div>
-          <p className="font-medium mb-1.5">Assigned to</p>
+          <p className="font-medium mb-1.5">{tr('Assigned to')}</p>
           <Select value={conv.assigned_user_id || ''} onChange={(e) => onUpdate({ assigned_user_id: e.target.value ? +e.target.value : null })}
-            placeholder="Unassigned" options={team.filter((u) => u.is_active).map((u) => ({ value: u.id, label: u.name }))} />
+            placeholder={tr('Unassigned')} options={team.filter((u) => u.is_active).map((u) => ({ value: u.id, label: u.name }))} />
         </div>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="font-medium">Chatbot</p>
-            <p className="text-ink-3">{conv.bot_active ? (session ? 'In a flow now' : 'Will answer keywords') : 'Paused for this chat'}</p>
+            <p className="font-medium">{tr('Chatbot')}</p>
+            <p className="text-ink-3">{conv.bot_active ? (session ? tr('In a flow now') : tr('Will answer keywords')) : tr('Paused for this chat')}</p>
           </div>
-          <button onClick={() => onUpdate({ bot_active: !conv.bot_active })} className="text-[13px] underline">{conv.bot_active ? 'Pause' : 'Resume'}</button>
+          <button onClick={() => onUpdate({ bot_active: !conv.bot_active })} className="text-[13px] underline">{conv.bot_active ? tr('Pause') : tr('Resume')}</button>
         </div>
         <div>
-          <p className="font-medium mb-1.5">Tags</p>
+          <p className="font-medium mb-1.5">{tr('Tags')}</p>
           <div className="flex flex-wrap gap-1">
-            {c.tags?.length ? c.tags.map((t) => <span key={t.id} className="rounded px-1.5 py-0.5 text-xs font-medium" style={{ background: `${t.color}1f`, color: t.color }}>{t.name}</span>) : <span className="text-ink-3">None</span>}
+            {c.tags?.length ? c.tags.map((t) => <span key={t.id} className="rounded px-1.5 py-0.5 text-xs font-medium" style={{ background: `${t.color}1f`, color: t.color }}>{t.name}</span>) : <span className="text-ink-3">{tr('None')}</span>}
           </div>
         </div>
         {!!Object.keys(c.attributes || {}).length && (
           <div>
-            <p className="font-medium mb-1.5">Details</p>
+            <p className="font-medium mb-1.5">{tr('Details')}</p>
             <dl className="space-y-1">
-              {Object.entries(c.attributes).map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-ink-3">{k.replace(/_/g, ' ')}</dt><dd className="text-right break-all">{String(v)}</dd></div>)}
+              {Object.entries(c.attributes).map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-ink-3">{k.replace(/_/g, ' ')}</dt><dd className="text-end break-all">{String(v)}</dd></div>)}
             </dl>
           </div>
         )}
         {!!conv.orders?.length && (
           <div>
-            <p className="font-medium mb-1.5">Recent orders</p>
+            <p className="font-medium mb-1.5">{tr('Recent orders')}</p>
             <ul className="space-y-1.5">
               {conv.orders.map((o) => (
                 <li key={o.id} className="flex items-center justify-between gap-2">
@@ -284,7 +292,7 @@ function ContactPanel({ conv, team, onUpdate }) {
             </ul>
           </div>
         )}
-        <p className="text-ink-3">Customer since {dateTime(c.created_at)}</p>
+        <p className="text-ink-3">{tr('Customer since {date}', { date: dateTime(c.created_at) })}</p>
       </div>
     </aside>
   );
@@ -292,12 +300,13 @@ function ContactPanel({ conv, team, onUpdate }) {
 
 // ---------------- simulator ----------------
 function Simulator({ open, onClose, onDone }) {
+  const tr = useT();
   const [f, setF] = useState({ phone: '+96550001234', name: 'Test Customer', text: 'hi' });
   const [run, busy] = useAction();
   return (
-    <Modal open={open} onClose={onClose} title="Message as a customer"
-      footer={<><Button onClick={onClose}>Close</Button><Button variant="primary" icon="send" loading={busy} onClick={() => run(async () => { const r = await post('/api/app/simulate/inbound', f); onDone(r.conversation_id); })}>Send to inbox</Button></>}>
-      <p className="text-ink-3 text-[13px]">Uses your demo number to test chatbots and the inbox without a real phone. Try "hi" to trigger the welcome flow.</p>
+    <Modal open={open} onClose={onClose} title={tr('Message as a customer')}
+      footer={<><Button onClick={onClose}>{tr('Close')}</Button><Button variant="primary" icon="send" loading={busy} onClick={() => run(async () => { const r = await post('/api/app/simulate/inbound', f); onDone(r.conversation_id); })}>{tr('Send to inbox')}</Button></>}>
+      <p className="text-ink-3 text-[13px]">{tr('Uses your demo number to test chatbots and the inbox without a real phone. Try "hi" to trigger the welcome flow.')}</p>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Customer phone"><Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></Field>
         <Field label="Customer name"><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
@@ -308,14 +317,15 @@ function Simulator({ open, onClose, onDone }) {
 }
 
 function NewChat({ open, onClose, onDone }) {
+  const tr = useT();
   const [f, setF] = useState({ phone: '', name: '' });
   const [run, busy] = useAction();
   return (
-    <Modal open={open} onClose={onClose} title="New conversation"
-      footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" loading={busy} onClick={() => run(async () => onDone((await post('/api/app/conversations/start', f)).id))}>Open chat</Button></>}>
+    <Modal open={open} onClose={onClose} title={tr('New conversation')}
+      footer={<><Button onClick={onClose}>{tr('Cancel')}</Button><Button variant="primary" loading={busy} onClick={() => run(async () => onDone((await post('/api/app/conversations/start', f)).id))}>{tr('Open chat')}</Button></>}>
       <Field label="Phone number" hint="International format, e.g. +965 5000 0000"><Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></Field>
       <Field label="Name (optional)"><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
-      <p className="text-ink-3 text-[13px]">The first message to a new contact must be an approved template.</p>
+      <p className="text-ink-3 text-[13px]">{tr('The first message to a new contact must be an approved template.')}</p>
     </Modal>
   );
 }
@@ -326,6 +336,7 @@ const FILTERS = [
 ];
 
 export default function Inbox() {
+  const tr = useT();
   const { id } = useParams();
   const nav = useNavigate();
   const { me } = useSession();
@@ -395,23 +406,23 @@ export default function Inbox() {
   return (
     <div className="flex h-full">
       {/* conversation list */}
-      <section className={cx('w-full md:w-[330px] shrink-0 border-r border-line bg-white flex flex-col', id && 'hidden md:flex')}>
+      <section className={cx('w-full md:w-[330px] shrink-0 border-e border-line bg-white flex flex-col', id && 'hidden md:flex')}>
         <div className="p-3 border-b border-line space-y-2">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold pl-1">Inbox</h1>
+            <h1 className="text-lg font-semibold ps-1">{tr('Inbox')}</h1>
             <div className="flex">
               {hasMock && <IconButton icon="sparkle" label="Message as a customer (demo)" onClick={() => setSimOpen(true)} />}
               <IconButton icon="plus" label="New conversation" onClick={() => setNewOpen(true)} />
             </div>
           </div>
           <div className="relative">
-            <Icon name="search" size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-3" />
-            <input className="field pl-8" placeholder="Search name, number, message" value={q} onChange={(e) => setQ(e.target.value)} />
+            <Icon name="search" size={16} className="absolute start-2.5 top-1/2 -translate-y-1/2 text-ink-3" />
+            <input className="field ps-8" placeholder={tr('Search name, number, message')} value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
           <div className="flex gap-1">
             {FILTERS.map((f) => (
               <button key={f.value} onClick={() => setStatus(f.value)} className={cx('px-2.5 py-1 rounded text-[13px] font-medium', status === f.value ? 'bg-ink text-white' : 'text-ink-3 hover:bg-paper')}>
-                {f.label} <span className="opacity-60">{counts[f.value] || 0}</span>
+                {tr(f.label)} <span className="opacity-60">{counts[f.value] || 0}</span>
               </button>
             ))}
           </div>
@@ -419,7 +430,7 @@ export default function Inbox() {
         </div>
         <ul className="flex-1 overflow-y-auto">
           {!list ? <Loading /> : !list.length ? (
-            <Empty title="Nothing here" body={status === 'open' ? 'New WhatsApp messages from customers will appear here.' : 'No conversations with this status.'} />
+            <Empty title={tr('Nothing here')} body={status === 'open' ? tr('New WhatsApp messages from customers will appear here.') : tr('No conversations with this status.')} />
           ) : list.map((c) => (
             <li key={c.id}>
               <Link to={`/app/inbox/${c.id}`} className={cx('flex gap-3 px-3 py-3 border-b border-line hover:bg-paper', String(c.id) === id && 'bg-signal-wash')}>
@@ -434,9 +445,9 @@ export default function Inbox() {
                     {c.unread_count > 0 && <span className="min-w-5 h-5 px-1.5 rounded-full bg-signal text-white text-[11px] font-semibold grid place-items-center">{c.unread_count}</span>}
                   </div>
                   <div className="flex gap-1 mt-1">
-                    {c.bot_active && <Badge tone="blue"><Icon name="bot" size={11} />Bot</Badge>}
-                    {!c.assigned_user_id && <Badge>Unassigned</Badge>}
-                    {!c.window_open && <Badge tone="amber">Window closed</Badge>}
+                    {c.bot_active && <Badge tone="blue"><Icon name="bot" size={11} />{tr('Bot')}</Badge>}
+                    {!c.assigned_user_id && <Badge>{tr('Unassigned')}</Badge>}
+                    {!c.window_open && <Badge tone="amber">{tr('Window closed')}</Badge>}
                   </div>
                 </div>
               </Link>
@@ -449,13 +460,13 @@ export default function Inbox() {
       <section className={cx('flex-1 min-w-0 flex flex-col', !id && 'hidden md:flex')}>
         {!conv ? (
           <div className="flex-1 grid place-items-center chat-ground">
-            <Empty icon="inbox" title="Pick a conversation" body={hasMock ? 'Or use the ✦ button to send yourself a test message from a pretend customer.' : 'Customer messages arrive here in real time.'} />
+            <Empty icon="inbox" title={tr('Pick a conversation')} body={hasMock ? tr('Or use the ✦ button to send yourself a test message from a pretend customer.') : tr('Customer messages arrive here in real time.')} />
           </div>
         ) : (
           <>
             <header className="flex flex-wrap items-center gap-3 justify-between px-4 py-2.5 border-b border-line bg-white">
               <div className="flex items-center gap-3 min-w-0">
-                <IconButton icon="arrowLeft" label="Back" className="md:hidden" onClick={() => nav('/app/inbox')} />
+                <IconButton icon="arrowLeft" label="Back" className="md:hidden rtl:-scale-x-100" onClick={() => nav('/app/inbox')} />
                 <Avatar name={conv.contact.name || conv.contact.wa_id} />
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{conv.contact.name || phone(conv.contact.wa_id)}</p>
@@ -465,8 +476,8 @@ export default function Inbox() {
               <div className="flex items-center gap-4">
                 <WindowMeter expiresAt={conv.window_expires_at} />
                 {conv.status !== 'resolved'
-                  ? <Button size="sm" icon="check" onClick={() => update({ status: 'resolved' })}>Resolve</Button>
-                  : <Button size="sm" onClick={() => update({ status: 'open' })}>Reopen</Button>}
+                  ? <Button size="sm" icon="check" onClick={() => update({ status: 'resolved' })}>{tr('Resolve')}</Button>
+                  : <Button size="sm" onClick={() => update({ status: 'open' })}>{tr('Reopen')}</Button>}
               </div>
             </header>
             <div className="flex-1 overflow-y-auto chat-ground px-4 sm:px-8 py-4">
