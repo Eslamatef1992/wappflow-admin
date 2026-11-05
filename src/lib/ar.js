@@ -932,4 +932,13 @@ export const AR = {
   'Delete {name}?': 'حذف {name}؟',
   'This permanently deletes the workspace and everything in it: the owner and team logins, contacts, chats, campaigns, templates, WhatsApp numbers and invoices. It cannot be undone.': 'سيتم حذف مساحة العمل نهائياً مع كل محتوياتها: حسابات المالك والفريق، وجهات الاتصال، والمحادثات، والحملات، والقوالب، وأرقام واتساب، والفواتير. لا يمكن التراجع عن ذلك.',
   'Type "{slug}" to confirm': 'اكتب "{slug}" للتأكيد',
+  'Account emails': 'رسائل البريد للحسابات',
+  'Workspace owners get a welcome email when they sign up, the invoice when one is issued, and a receipt when they pay. Sent from {from}.': 'يتلقى أصحاب مساحات العمل رسالة ترحيب عند التسجيل، والفاتورة عند إصدارها، وإيصالاً عند الدفع. تُرسل من {from}.',
+  'Send test to': 'أرسل التجربة إلى',
+  'Send test welcome': 'تجربة رسالة الترحيب',
+  'Send test invoice': 'تجربة رسالة الفاتورة',
+  'Send test receipt': 'تجربة رسالة الإيصال',
+  'Test email sent. Check the inbox (and spam).': 'تم إرسال رسالة التجربة. تحقق من البريد الوارد (والرسائل غير المرغوبة).',
+  'Email is off. Add MAILGUN_API_KEY and MAILGUN_DOMAIN to the server settings to send welcome, invoice and receipt emails.': 'البريد متوقف. أضف MAILGUN_API_KEY و MAILGUN_DOMAIN إلى إعدادات الخادم لإرسال رسائل الترحيب والفواتير والإيصالات.',
+  'Email is not set up. Add MAILGUN_API_KEY and MAILGUN_DOMAIN to the server settings.': 'البريد غير مُعدّ. أضف MAILGUN_API_KEY و MAILGUN_DOMAIN إلى إعدادات الخادم.',
 };
