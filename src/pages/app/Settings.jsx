@@ -153,7 +153,7 @@ function Developers() {
           <pre className="bg-ink text-white/90 rounded-md p-3 text-[12px] overflow-x-auto" dir="ltr">{`curl -X POST ${base}/api/v1/messages \\
   -H "X-API-Key: wsk_…" -H "Content-Type: application/json" \\
   -d '{"to":"+96550000000","template":"order_shipped","variables":{"body":["Ali","#1042"]}}'`}</pre>
-          <p className="text-[12px] text-ink-3 mt-2">{tr('Also available: POST /api/v1/contacts, POST /api/v1/orders, PATCH /api/v1/orders/:id, GET /api/v1/templates.')}</p>
+          <p className="text-[12px] text-ink-3 mt-2">{tr('Also available: POST /api/v1/contacts, POST /api/v1/orders, PATCH /api/v1/orders/:id, POST /api/v1/invoices, GET /api/v1/templates.')}</p>
         </div>
       </Panel>
       <Panel title={tr('Webhooks to your system')} padded={false} actions={<Button size="sm" variant="primary" icon="plus" onClick={() => setHook({ url: '', events: [] })}>{tr('Add endpoint')}</Button>}>

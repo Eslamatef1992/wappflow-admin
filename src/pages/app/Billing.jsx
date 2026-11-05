@@ -37,7 +37,7 @@ export default function Billing() {
     <>
       <PageHeader title={tr('Plan & billing')} />
       {q.get('payment') === 'success' && <div className="mb-4 rounded-md bg-signal-wash text-signal-deep px-4 py-3">{tr('Payment received. Thank you, your plan is active.')}</div>}
-      {q.get('payment') === 'pending' && unpaid && <div className="mb-4 rounded-md bg-amber-wash text-[#7a4d0c] px-4 py-3">{tr('Your payment is not confirmed yet. If you completed it on PayPal, use "I already paid with PayPal" below in a minute.')}</div>}
+      {q.get('payment') === 'pending' && unpaid && <div className="mb-4 rounded-md bg-amber-wash text-[#7a4d0c] px-4 py-3">{tr('Your payment is not confirmed yet. If you completed it on PayPal, use "I already paid" below in a minute.')}</div>}
       {q.get('payment') === 'canceled' && <div className="mb-4 rounded-md bg-paper border border-line text-ink-2 px-4 py-3">{tr('Payment canceled. You can try again any time.')}</div>}
       {unpaid && (
         <div className="mb-6 rounded-lg border border-amber/40 bg-amber-wash p-4 flex flex-wrap gap-4 items-center justify-between">
@@ -48,15 +48,16 @@ export default function Billing() {
           {data.onlinePayments ? (
             <div className="flex flex-col items-stretch sm:items-end gap-2">
               <div className="flex flex-wrap gap-2">
+                {methods.card && <Button variant="primary" icon="card" loading={busy} onClick={() => pay(unpaid, 'card')}>{tr('Pay with Visa / Mastercard')}</Button>}
                 {methods.paypal && <Button variant="dark" loading={busy} onClick={() => pay(unpaid, 'paypal')}>{tr('Pay with PayPal')}</Button>}
-                {methods.tap && <Button variant="primary" icon="card" loading={busy} onClick={() => pay(unpaid, 'tap')}>{tr('Pay with KNET or card')}</Button>}
+                {methods.tap && <Button variant={methods.card ? 'secondary' : 'primary'} icon="card" loading={busy} onClick={() => pay(unpaid, 'tap')}>{tr('Pay with KNET or card')}</Button>}
               </div>
               {methods.paypal && quote?.converted && (
-                <p className="text-[12px] text-[#7a4d0c]" dir="ltr">{tr('PayPal charges {amount} (converted from {original}).', { amount: `${quote.value} ${quote.currency}`, original: money(unpaid.amount, unpaid.currency) })}</p>
+                <p className="text-[12px] text-[#7a4d0c]" dir="ltr">{tr('Card and PayPal payments are charged {amount} (converted from {original}).', { amount: `${quote.value} ${quote.currency}`, original: money(unpaid.amount, unpaid.currency) })}</p>
               )}
-              {unpaid.provider === 'paypal' && <button className="text-[12px] underline text-[#7a4d0c]" onClick={() => check(unpaid)}>{tr('I already paid with PayPal')}</button>}
+              {unpaid.provider === 'paypal' && <button className="text-[12px] underline text-[#7a4d0c]" onClick={() => check(unpaid)}>{tr('I already paid')}</button>}
             </div>
-          ) : <p className="text-[13px] max-w-[48ch]">{data.bankDetails || tr('Pay by bank transfer and send the receipt to our team. Your plan activates as soon as we confirm it.')}</p>}
+          ) : <p className="text-[13px] max-w-[48ch]">{data.bankDetails || tr('Online payment is not switched on yet. Contact us to pay this invoice and we will activate your plan.')}</p>}
         </div>
       )}
       <div className="grid lg:grid-cols-[1fr_360px] gap-6 mb-8">

@@ -18,6 +18,7 @@ const CampaignDetail = lazy(() => import('./pages/app/CampaignDetail.jsx'));
 const Flows = lazy(() => import('./pages/app/Flows.jsx'));
 const FlowBuilder = lazy(() => import('./pages/app/FlowBuilder.jsx'));
 const Commerce = lazy(() => import('./pages/app/Commerce.jsx'));
+const Invoices = lazy(() => import('./pages/app/Invoices.jsx'));
 const Settings = lazy(() => import('./pages/app/Settings.jsx'));
 const Billing = lazy(() => import('./pages/app/Billing.jsx'));
 const AdminOverview = lazy(() => import('./pages/admin/Overview.jsx'));
@@ -71,6 +72,7 @@ createRoot(document.getElementById('root')).render(
               <Route path="flows" element={<S><Flows /></S>} />
               <Route path="flows/:id" element={<S><FlowBuilder /></S>} />
               <Route path="commerce" element={<S><Commerce /></S>} />
+              <Route path="invoices" element={<S><Invoices /></S>} />
               <Route path="settings" element={<S><Settings /></S>} />
               <Route path="billing" element={<S><Billing /></S>} />
             </Route>
