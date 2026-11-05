@@ -7,6 +7,7 @@ import { ToastProvider, Loading } from './components/ui.jsx';
 import { AppShell, AdminShell } from './components/Shell.jsx';
 import { Login, Signup } from './pages/Auth.jsx';
 
+const Landing = lazy(() => import('./pages/site/Landing.jsx'));
 const Dashboard = lazy(() => import('./pages/app/Dashboard.jsx'));
 const Inbox = lazy(() => import('./pages/app/Inbox.jsx'));
 const Contacts = lazy(() => import('./pages/app/Contacts.jsx'));
@@ -36,13 +37,6 @@ function Guard({ admin, children }) {
   return children;
 }
 
-function Home() {
-  const { loading, me } = useSession();
-  if (loading) return <Loading />;
-  if (!me) return <Navigate to="/login" replace />;
-  return <Navigate to={me.user.role === 'superadmin' ? '/admin' : '/app'} replace />;
-}
-
 const S = ({ children }) => <Suspense fallback={<Loading />}>{children}</Suspense>;
 
 createRoot(document.getElementById('root')).render(
@@ -51,7 +45,7 @@ createRoot(document.getElementById('root')).render(
       <ToastProvider>
         <SessionProvider>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<S><Landing /></S>} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/app" element={<Guard><AppShell /></Guard>}>

@@ -165,7 +165,7 @@ function Developers() {
               </span>
             ) },
           ]} />
-        <p className="p-4 border-t border-line text-[12px] text-ink-3">Each request carries an <span className="font-mono">X-Wasla-Signature</span> header: HMAC-SHA256 of the raw body using the endpoint's signing secret.</p>
+        <p className="p-4 border-t border-line text-[12px] text-ink-3">Each request carries an <span className="font-mono">X-WappFlow-Signature</span> header: HMAC-SHA256 of the raw body using the endpoint's signing secret.</p>
       </Panel>
       <Modal open={!!newKey} onClose={() => setNewKey(null)} title="Your new API key" footer={<Button variant="primary" onClick={() => setNewKey(null)}>I've copied it</Button>}>
         {newKey && <><p className="text-[13px] text-ink-3">Copy it now. For your security it won't be shown again.</p><CopyField value={newKey.key} /></>}

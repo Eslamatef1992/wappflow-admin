@@ -2,14 +2,15 @@
 
 @theme {
   --font-sans: "IBM Plex Sans Arabic", system-ui, sans-serif;
-  --color-ink: #0f2a2e;        /* Gulf-teal rail and primary text */
-  --color-ink-2: #1c4147;
-  --color-ink-3: #5a7176;      /* secondary text */
-  --color-paper: #f6f8f7;      /* app ground */
-  --color-line: #e1e7e5;
-  --color-signal: #1faf6a;     /* send, delivered, read */
-  --color-signal-deep: #128552;
-  --color-signal-wash: #e5f6ed;
+  --color-ink: #0c1b33;        /* WappFlow navy (logo wordmark): rail and primary text */
+  --color-ink-2: #1d3152;
+  --color-ink-3: #5b6a82;      /* secondary text */
+  --color-paper: #f5f7f9;      /* app ground */
+  --color-line: #e2e7ee;
+  --color-signal: #02af47;     /* WappFlow green (logo): send, delivered, read */
+  --color-signal-deep: #038a3a;
+  --color-signal-glow: #2fd24a;
+  --color-signal-wash: #e3f7e9;
   --color-amber: #e39b2d;      /* time pressure: 24h window, trials */
   --color-amber-wash: #fcf1df;
   --color-danger: #c8412f;
@@ -47,8 +48,8 @@ textarea.field { resize: vertical; }
 }
 
 .chat-ground {
-  background-color: #eef2ef;
-  background-image: radial-gradient(rgba(15, 42, 46, .05) 1px, transparent 1px);
+  background-color: #edf2ef;
+  background-image: radial-gradient(rgba(12, 27, 51, .05) 1px, transparent 1px);
   background-size: 18px 18px;
 }
 

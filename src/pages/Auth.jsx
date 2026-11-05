@@ -9,7 +9,7 @@ function Frame({ children }) {
   return (
     <div className="min-h-screen grid lg:grid-cols-[1fr_520px]">
       <div className="hidden lg:flex flex-col justify-between bg-ink text-white p-12 chat-ground !bg-ink" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px)' }}>
-        <p className="text-lg font-semibold">{config?.brand || 'Wasla'}</p>
+        <Link to="/"><img src="/brand/wappflow-logo-white.png" alt={config?.brand || 'WappFlow'} className="h-9 w-auto" /></Link>
         {/* a real-looking exchange tells the story better than a slogan */}
         <div className="max-w-[420px] space-y-3 text-[15px]">
           <div className="bg-white text-ink rounded-xl rounded-tl-sm px-4 py-2.5 w-fit max-w-[85%]" dir="rtl">مرحبا، هل الطلب جاهز؟</div>
@@ -34,11 +34,11 @@ export function Login() {
   const [f, setF] = useState({ email: '', password: '' });
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
-  if (me) return <Navigate to="/" replace />;
+  if (me) return <Navigate to="/app" replace />;
   const submit = async (e) => {
     e.preventDefault();
     setBusy(true); setErr(null);
-    try { await login(f.email, f.password); nav('/'); } catch (x) { setErr(x); } finally { setBusy(false); }
+    try { await login(f.email, f.password); nav('/app'); } catch (x) { setErr(x); } finally { setBusy(false); }
   };
   return (
     <Frame>
@@ -62,7 +62,7 @@ export function Signup() {
   const [f, setF] = useState({ company: '', name: '', email: '', password: '', planId: q.get('plan') || '' });
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
-  if (me) return <Navigate to="/" replace />;
+  if (me) return <Navigate to="/app" replace />;
   if (config && !config.allowSignup) {
     return <Frame><h1 className="text-2xl font-semibold mb-2">Accounts by invitation</h1><p className="text-ink-3">Contact us and we'll set up your workspace.</p><Link to="/login" className="underline mt-6 block">Sign in</Link></Frame>;
   }

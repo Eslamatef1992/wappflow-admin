@@ -1,6 +1,6 @@
-# Wasla Admin — WhatsApp Business Platform dashboard
+# WappFlow Admin — website, dashboard and super-admin panel
 
-The web dashboard of the Wasla platform: the **customer workspace app** (`/app`) and the **super-admin panel** (`/admin`).
+The web front end of the WappFlow platform: the **public website** (`/`, English and Arabic), the **customer workspace app** (`/app`) and the **super-admin panel** (`/admin`).
 The API lives in **[wappflow-api](https://github.com/Eslamatef1992/wappflow-api)** — full feature list, Meta setup and deployment guide are in its README.
 
 React 19 · Vite · Tailwind CSS 4 · React Flow (chatbot builder) · Recharts · Socket.IO client
@@ -19,6 +19,15 @@ React 19 · Vite · Tailwind CSS 4 · React Flow (chatbot builder) · Recharts �
 | Settings: WhatsApp numbers, team, quick replies, API keys & webhooks | |
 | Plan & billing: usage, invoices, pay online or by transfer | |
 
+## Website (`/`)
+
+Bilingual marketing site (English / Arabic with right-to-left layout) with an animated WhatsApp chatbot demo, solutions, product screenshots, industries, setup steps, integrations, live pricing from your plans, FAQ and footer.
+
+- **All copy** is in `src/pages/site/content.js`, both languages side by side.
+- **Before launch:** set your sales email and WhatsApp number in `CONTACT` at the top of that file, and publish `/terms` and `/privacy` pages (linked from the footer).
+- **Pricing** is read live from the plans you manage in Admin → Plans.
+- **Screenshots** live in `public/site/`; **logo files** in `public/brand/`.
+
 ## Development
 
 ```bash
@@ -27,7 +36,7 @@ npm run dev        # http://localhost:5173 — proxies /api and /socket.io to ht
 ```
 
 Run the backend first (`npm run dev` in wappflow-api, after `npm run seed -- --demo`), then sign in with
-`owner@demo.local` / `demo12345` (workspace) or `admin@wasla.local` / `admin12345` (super admin).
+`owner@demo.local` / `demo12345` (workspace) or `admin@wappflow.local` / `admin12345` (super admin).
 
 ## Production
 

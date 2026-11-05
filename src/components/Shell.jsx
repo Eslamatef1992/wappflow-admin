@@ -5,17 +5,7 @@ import { Icon } from './icons.jsx';
 import { Avatar, cx } from './ui.jsx';
 import { date } from '../lib/format.js';
 
-function Mark() {
-  // two speech bubbles joined: "wasla" = connection
-  return (
-    <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
-      <path d="M5 6h13a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H11l-5 4v-4H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3z" fill="#1faf6a" />
-      <path d="M27 12H23v6a5 5 0 0 1-5 5h-4v1a3 3 0 0 0 3 3h5l4 3v-3h1a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3z" fill="#fff" fillOpacity=".9" />
-    </svg>
-  );
-}
-
-function Rail({ items, footer, brand }) {
+function Rail({ items, footer, brand, badge }) {
   const [open, setOpen] = useState(false);
   const loc = useLocation();
   return (
@@ -24,12 +14,13 @@ function Rail({ items, footer, brand }) {
         <button className="w-9 h-9 rounded-md grid place-items-center hover:bg-white/10" aria-label="Open menu" onClick={() => setOpen(true)}>
           <Icon name="more" />
         </button>
-        <span className="font-semibold">{brand}</span>
+        <img src="/brand/wappflow-logo-white.png" alt={brand} className="h-6 w-auto" />
       </div>
       {open && <div className="lg:hidden fixed inset-0 z-40 bg-ink/40" onClick={() => setOpen(false)} />}
       <aside className={cx('fixed lg:sticky top-0 z-50 h-screen w-[232px] shrink-0 bg-ink text-white/80 flex flex-col transition-transform lg:translate-x-0', open ? 'translate-x-0' : '-translate-x-full')}>
         <div className="flex items-center gap-2.5 px-5 h-16 text-white">
-          <Mark /><span className="text-[17px] font-semibold tracking-tight">{brand}</span>
+          <img src="/brand/wappflow-logo-white.png" alt={brand} className="h-7 w-auto" />
+          {badge && <span className="text-[11px] font-semibold rounded px-1.5 py-0.5 bg-white/10 text-white/80">{badge}</span>}
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5" onClick={() => setOpen(false)}>
           {items.map((it) => it.section ? (
@@ -116,7 +107,7 @@ export function AppShell() {
   const full = loc.pathname.startsWith('/app/inbox') || /^\/app\/flows\/\d+/.test(loc.pathname);
   return (
     <div className={cx('flex flex-col lg:flex-row', full ? 'h-[100dvh]' : 'min-h-screen')}>
-      <Rail items={items} brand={config?.brand || 'Wasla'} footer={<UserFooter />} />
+      <Rail items={items} brand={config?.brand || 'WappFlow'} footer={<UserFooter />} />
       <main className="flex-1 min-w-0 min-h-0 flex flex-col">
         <StatusBanner />
         {full ? <div className="flex-1 min-h-0"><Outlet /></div> : <div className="px-4 sm:px-8 py-6 sm:py-8 max-w-[1240px] w-full mx-auto"><Outlet /></div>}
@@ -136,7 +127,7 @@ export function AdminShell() {
   ];
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
-      <Rail items={items} brand={`${config?.brand || 'Wasla'} Admin`} footer={<UserFooter />} />
+      <Rail items={items} brand={config?.brand || 'WappFlow'} badge="Admin" footer={<UserFooter />} />
       <main className="flex-1 min-w-0 px-4 sm:px-8 py-6 sm:py-8 max-w-[1240px] mx-auto w-full"><Outlet /></main>
     </div>
   );

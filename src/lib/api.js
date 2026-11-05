@@ -3,10 +3,10 @@ import { useCallback, useEffect, useState } from 'react';
 const BASE = import.meta.env.VITE_API_URL || '';
 
 export const tokenStore = {
-  get: () => localStorage.getItem('wasla_token'),
-  set: (t) => (t ? localStorage.setItem('wasla_token', t) : localStorage.removeItem('wasla_token')),
-  getAdmin: () => localStorage.getItem('wasla_admin_token'),
-  setAdmin: (t) => (t ? localStorage.setItem('wasla_admin_token', t) : localStorage.removeItem('wasla_admin_token')),
+  get: () => localStorage.getItem('wappflow_token'),
+  set: (t) => (t ? localStorage.setItem('wappflow_token', t) : localStorage.removeItem('wappflow_token')),
+  getAdmin: () => localStorage.getItem('wappflow_admin_token'),
+  setAdmin: (t) => (t ? localStorage.setItem('wappflow_admin_token', t) : localStorage.removeItem('wappflow_admin_token')),
 };
 
 export class ApiError extends Error {
