@@ -75,7 +75,7 @@ export default function Billing() {
             <StatusBadge status={tenant.status} />
           </div>
           <p className="text-ink-3 text-[13px] mb-5">
-            {tenant.status === 'trial' ? tr('Free trial until {date}', { date: date(tenant.trial_ends_at) }) : sub ? tr('{interval} · renews {date}', { interval: tr(sub.billing_interval === 'yearly' ? tr('Yearly') : tr('Monthly')), date: date(sub.current_period_end) }) : ''}
+            {tenant.status === 'trial' ? (tenant.trial_ends_at ? tr('Free trial until {date}', { date: date(tenant.trial_ends_at) }) : tr('Preview: choose a plan and pay to go live')) : sub ? tr('{interval} · renews {date}', { interval: tr(sub.billing_interval === 'yearly' ? tr('Yearly') : tr('Monthly')), date: date(sub.current_period_end) }) : ''}
           </p>
           <div className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
             <Meter label="Messages this month" value={usage.monthly_messages} max={plan?.limits.monthly_messages} />

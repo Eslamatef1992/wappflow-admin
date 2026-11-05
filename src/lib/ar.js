@@ -921,4 +921,12 @@ export const AR = {
   'Your plan has ended. Pay the invoice below to keep using your workspace.': 'انتهت باقتك. ادفع الفاتورة بالأسفل لمواصلة استخدام مساحة عملك.',
   'You are using a demo number. Messages are simulated and never reach real phones.': 'أنت تستخدم رقماً تجريبياً. الرسائل محاكاة فقط ولا تصل إلى الهواتف الحقيقية.',
   'Connect your WhatsApp number': 'اربط رقم واتساب الخاص بك',
+  'Choose a plan to connect your number': 'اختر باقة لربط رقمك',
+  'Connecting your real number and sending real messages start once you choose a plan and pay.': 'يبدأ ربط رقمك الحقيقي وإرسال الرسائل الفعلية بعد اختيار باقة والدفع.',
+  'Preview mode: explore every feature with a demo number. Choose a plan to connect your WhatsApp number and send real messages.': 'وضع المعاينة: جرّب كل المزايا برقم تجريبي. اختر باقة لربط رقم واتساب الخاص بك وإرسال رسائل حقيقية.',
+  'Preview: choose a plan and pay to go live': 'معاينة: اختر باقة وادفع للتشغيل الفعلي',
+  'Create your workspace': 'أنشئ مساحة عملك',
+  'Explore every feature free with a demo number. Choose a plan when you are ready to connect your WhatsApp number.': 'جرّب كل المزايا مجاناً برقم تجريبي، واختر باقة عندما تكون جاهزاً لربط رقم واتساب الخاص بك.',
+  'Choose a plan and pay to connect your WhatsApp number. Until then you can explore everything with a demo number.': 'اختر باقة وادفع لربط رقم واتساب الخاص بك. حتى ذلك الحين يمكنك تجربة كل شيء برقم تجريبي.',
+  'Choose a plan and pay to send real WhatsApp messages. Until then you can explore everything with a demo number.': 'اختر باقة وادفع لإرسال رسائل واتساب حقيقية. حتى ذلك الحين يمكنك تجربة كل شيء برقم تجريبي.',
 };

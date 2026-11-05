@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { del, patch, post, put, useApi } from '../../lib/api.js';
 import { useSession, can } from '../../lib/session.jsx';
 import { Avatar, Badge, Button, CopyField, Empty, Field, IconButton, Input, Loading, Modal, PageHeader, Panel, Select, StatusBadge, Table, Tabs, Textarea, Toggle, useAction } from '../../components/ui.jsx';
@@ -8,6 +8,7 @@ import { useT } from '../../lib/i18n.jsx';
 
 function Numbers() {
   const tr = useT();
+  const { me } = useSession();
   const { data, reload } = useApi('/api/app/numbers');
   const [modal, setModal] = useState(null);
   const [f, setF] = useState({});
@@ -21,11 +22,14 @@ function Numbers() {
         <div className="rounded-lg bg-signal-wash border border-signal/30 p-4">
           <p className="font-semibold">{tr('Welcome! Connect a WhatsApp number to start.')}</p>
           <p className="text-[13px] mt-1">{tr('No Meta account yet? Add a demo number to try the inbox, chatbots and campaigns right away.')}</p>
+          {me?.preview && <p className="text-[13px] mt-1">{tr('Connecting your real number and sending real messages start once you choose a plan and pay.')}</p>}
         </div>
       )}
       <Panel title={tr('WhatsApp numbers')} padded={false} actions={<>
         <Button size="sm" onClick={() => setModal('mock')}>{tr('Add demo number')}</Button>
-        <Button size="sm" variant="primary" icon="plus" onClick={() => { setF({}); setModal('live'); }}>{tr('Connect number')}</Button>
+        {me?.preview
+          ? <Link to="/app/billing"><Button size="sm" variant="primary" icon="card">{tr('Choose a plan to connect your number')}</Button></Link>
+          : <Button size="sm" variant="primary" icon="plus" onClick={() => { setF({}); setModal('live'); }}>{tr('Connect number')}</Button>}
       </>}>
         <Table rows={list} empty={<Empty icon="phone" title={tr('No number connected')} body="Connect the WhatsApp Business number your customers already message." />}
           columns={[

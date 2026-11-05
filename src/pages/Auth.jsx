@@ -82,8 +82,13 @@ export function Signup() {
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
   return (
     <Frame>
-      <h1 className="text-2xl font-semibold mb-1">{tr('Start your {days}-day trial', { days: config?.trialDays || 14 })}</h1>
-      <p className="text-ink-3 mb-6">{tr('No card needed. Connect your WhatsApp number after signing up.')}</p>
+      {config?.trialDays > 0 ? <>
+        <h1 className="text-2xl font-semibold mb-1">{tr('Start your {days}-day trial', { days: config.trialDays })}</h1>
+        <p className="text-ink-3 mb-6">{tr('No card needed. Connect your WhatsApp number after signing up.')}</p>
+      </> : <>
+        <h1 className="text-2xl font-semibold mb-1">{tr('Create your workspace')}</h1>
+        <p className="text-ink-3 mb-6">{tr('Explore every feature free with a demo number. Choose a plan when you are ready to connect your WhatsApp number.')}</p>
+      </>}
       <form onSubmit={submit} className="space-y-4">
         <Field label="Business name"><Input required value={f.company} onChange={set('company')} /></Field>
         <Field label="Your name"><Input required value={f.name} onChange={set('name')} /></Field>
