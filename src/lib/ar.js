@@ -919,4 +919,6 @@ export const AR = {
   'Pay for the {plan} plan': 'الدفع لباقة {plan}',
   'Your plan starts as soon as the payment goes through.': 'تبدأ باقتك فور إتمام الدفع.',
   'Your plan has ended. Pay the invoice below to keep using your workspace.': 'انتهت باقتك. ادفع الفاتورة بالأسفل لمواصلة استخدام مساحة عملك.',
+  'You are using a demo number. Messages are simulated and never reach real phones.': 'أنت تستخدم رقماً تجريبياً. الرسائل محاكاة فقط ولا تصل إلى الهواتف الحقيقية.',
+  'Connect your WhatsApp number': 'اربط رقم واتساب الخاص بك',
 };

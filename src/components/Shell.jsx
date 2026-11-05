@@ -72,6 +72,12 @@ function StatusBanner() {
           <button className="underline" onClick={stopImpersonating}>{tr('Back to admin')}</button>
         </div>
       )}
+      {me?.whatsapp === 'demo' && (
+        <div className="bg-[#1f4fd1] text-white text-[13px] px-6 py-2 flex items-center justify-between gap-3">
+          <span>{tr('You are using a demo number. Messages are simulated and never reach real phones.')}</span>
+          <Link to="/app/settings?tab=numbers" className="font-semibold underline whitespace-nowrap">{tr('Connect your WhatsApp number')}</Link>
+        </div>
+      )}
       {t?.status === 'trial' && (
         <div className="bg-amber-wash text-[#7a4d0c] text-[13px] px-6 py-2 flex items-center justify-between gap-3">
           <span>{tr('Free trial ends {date}. Choose a plan to keep your number and contacts active.', { date: date(t.trial_ends_at) })}</span>
