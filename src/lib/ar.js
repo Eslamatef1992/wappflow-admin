@@ -929,4 +929,7 @@ export const AR = {
   'Explore every feature free with a demo number. Choose a plan when you are ready to connect your WhatsApp number.': 'جرّب كل المزايا مجاناً برقم تجريبي، واختر باقة عندما تكون جاهزاً لربط رقم واتساب الخاص بك.',
   'Choose a plan and pay to connect your WhatsApp number. Until then you can explore everything with a demo number.': 'اختر باقة وادفع لربط رقم واتساب الخاص بك. حتى ذلك الحين يمكنك تجربة كل شيء برقم تجريبي.',
   'Choose a plan and pay to send real WhatsApp messages. Until then you can explore everything with a demo number.': 'اختر باقة وادفع لإرسال رسائل واتساب حقيقية. حتى ذلك الحين يمكنك تجربة كل شيء برقم تجريبي.',
+  'Delete {name}?': 'حذف {name}؟',
+  'This permanently deletes the workspace and everything in it: the owner and team logins, contacts, chats, campaigns, templates, WhatsApp numbers and invoices. It cannot be undone.': 'سيتم حذف مساحة العمل نهائياً مع كل محتوياتها: حسابات المالك والفريق، وجهات الاتصال، والمحادثات، والحملات، والقوالب، وأرقام واتساب، والفواتير. لا يمكن التراجع عن ذلك.',
+  'Type "{slug}" to confirm': 'اكتب "{slug}" للتأكيد',
 };
