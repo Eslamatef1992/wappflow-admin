@@ -129,6 +129,7 @@ export function AdminShell() {
     { to: '/admin/plans', icon: 'card', label: 'Plans' },
     { to: '/admin/invoices', icon: 'receipt', label: 'Invoices' },
     { to: '/admin/system', icon: 'server', label: 'System' },
+    { to: '/admin/account', icon: 'key', label: 'Account' },
   ];
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">

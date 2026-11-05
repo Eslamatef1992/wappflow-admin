@@ -214,13 +214,17 @@ export function Pager({ page, total, limit, onChange }) {
 export function Modal({ open, onClose, title, children, footer, width = 520 }) {
   const ref = useRef(null);
   const t = useT();
+  // Pages pass a new onClose function on every render; keep the latest in a ref so the
+  // effect below runs only when the popup opens (re-running it moved focus on every keystroke).
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   useEffect(() => {
     if (!open) return undefined;
-    const onKey = (e) => e.key === 'Escape' && onClose?.();
+    const onKey = (e) => e.key === 'Escape' && onCloseRef.current?.();
     window.addEventListener('keydown', onKey);
-    ref.current?.querySelector('input,textarea,select,button')?.focus();
+    ref.current?.querySelector('[data-modal-body] input:not([readonly]),[data-modal-body] textarea,[data-modal-body] select')?.focus();
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open]);
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 bg-ink/40 overflow-y-auto" onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
@@ -229,7 +233,7 @@ export function Modal({ open, onClose, title, children, footer, width = 520 }) {
           <h2 className="font-semibold text-base">{t(title)}</h2>
           <IconButton icon="x" label="Close" onClick={onClose} />
         </div>
-        <div className="px-5 py-4 space-y-4">{children}</div>
+        <div className="px-5 py-4 space-y-4" data-modal-body>{children}</div>
         {footer && <div className="flex justify-end gap-2 px-5 py-3 border-t border-line bg-paper rounded-b-lg">{footer}</div>}
       </div>
     </div>

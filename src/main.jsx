@@ -26,6 +26,7 @@ const AdminTenant = lazy(() => import('./pages/admin/Tenant.jsx'));
 const AdminPlans = lazy(() => import('./pages/admin/Plans.jsx'));
 const AdminInvoices = lazy(() => import('./pages/admin/Invoices.jsx'));
 const AdminSystem = lazy(() => import('./pages/admin/System.jsx'));
+const AdminAccount = lazy(() => import('./pages/admin/Account.jsx'));
 
 function Guard({ admin, children }) {
   const { loading, me } = useSession();
@@ -80,6 +81,7 @@ createRoot(document.getElementById('root')).render(
               <Route path="plans" element={<S><AdminPlans /></S>} />
               <Route path="invoices" element={<S><AdminInvoices /></S>} />
               <Route path="system" element={<S><AdminSystem /></S>} />
+              <Route path="account" element={<S><AdminAccount /></S>} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

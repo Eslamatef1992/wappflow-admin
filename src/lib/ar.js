@@ -832,4 +832,6 @@ export const AR = {
   '{n} seconds': '{n} ثانية',
   'Description (English)': 'الوصف (بالإنجليزية)',
   'Description (Arabic)': 'الوصف (بالعربية)',
+  'Repeat new password': 'أعد كتابة كلمة المرور الجديدة',
+  'The new passwords do not match': 'كلمتا المرور الجديدتان غير متطابقتين',
 };
