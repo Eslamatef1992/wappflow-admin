@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --color-ink: #0f2a2e;        /* Gulf-teal rail and primary text */
+  --color-ink-2: #1c4147;
+  --color-ink-3: #5a7176;      /* secondary text */
+  --color-paper: #f6f8f7;      /* app ground */
+  --color-line: #e1e7e5;
+  --color-signal: #1faf6a;     /* send, delivered, read */
+  --color-signal-deep: #128552;
+  --color-signal-wash: #e5f6ed;
+  --color-amber: #e39b2d;      /* time pressure: 24h window, trials */
+  --color-amber-wash: #fcf1df;
+  --color-danger: #c8412f;
+  --color-danger-wash: #fbe9e6;
+  --color-bubble-out: #dcf5e6;
+  --color-note: #fff6d6;
+}
+
+html, body, #root { height: 100%; }
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { line-height: 1.2; letter-spacing: -0.01em; }
+
+:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 2px; border-radius: 4px; }
+
+@layer components {
+.field {
+  width: 100%;
+  border: 1px solid var(--color-line);
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font: inherit;
+  color: inherit;
+  transition: border-color .15s;
+}
+.field:focus { outline: none; border-color: var(--color-signal); box-shadow: 0 0 0 3px var(--color-signal-wash); }
+textarea.field { resize: vertical; }
+}
+
+.chat-ground {
+  background-color: #eef2ef;
+  background-image: radial-gradient(rgba(15, 42, 46, .05) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* React Flow tweaks */
+.react-flow__handle { width: 10px; height: 10px; border: 2px solid #fff; background: var(--color-ink-3); }
+.react-flow__handle.opt { background: var(--color-signal); }
+.react-flow__attribution { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
