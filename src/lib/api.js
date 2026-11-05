@@ -24,6 +24,9 @@ export async function api(path, { method = 'GET', body, form, raw } = {}) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     if (res.status === 401 && token) { tokenStore.set(null); window.location.href = '/login'; }
+    if (res.status === 402 && /suspended/i.test(data.error || '') && !window.location.pathname.startsWith('/app/billing')) {
+      window.location.href = '/app/billing';
+    }
     throw new ApiError(res.status, data.error || `Request failed (${res.status})`, data.details);
   }
   return data;

@@ -24,21 +24,39 @@ export default function Billing() {
   const unpaid = invoices.find((i) => i.status === 'unpaid');
 
   const choose = (p) => run(async () => { await post('/api/app/billing/subscribe', { planId: p.id, interval }); await reload(); await refresh(); }, 'Invoice created. Pay it to activate the plan.');
-  const pay = (inv) => run(async () => { const { url } = await post(`/api/app/billing/invoices/${inv.id}/pay`); window.location.href = url; });
+  const pay = (inv, method) => run(async () => { const { url } = await post(`/api/app/billing/invoices/${inv.id}/pay`, { method }); window.location.href = url; });
+  const check = (inv) => run(async () => {
+    const r = await post(`/api/app/billing/invoices/${inv.id}/check`);
+    if (!r.paid) throw new Error(tr('We could not find a completed payment for this invoice yet.'));
+    await reload(); await refresh();
+  }, 'Payment received. Thank you, your plan is active.');
+  const methods = data.paymentMethods || {};
+  const quote = unpaid && data.paypalQuotes?.[unpaid.id];
 
   return (
     <>
       <PageHeader title={tr('Plan & billing')} />
       {q.get('payment') === 'success' && <div className="mb-4 rounded-md bg-signal-wash text-signal-deep px-4 py-3">{tr('Payment received. Thank you, your plan is active.')}</div>}
+      {q.get('payment') === 'pending' && unpaid && <div className="mb-4 rounded-md bg-amber-wash text-[#7a4d0c] px-4 py-3">{tr('Your payment is not confirmed yet. If you completed it on PayPal, use "I already paid with PayPal" below in a minute.')}</div>}
+      {q.get('payment') === 'canceled' && <div className="mb-4 rounded-md bg-paper border border-line text-ink-2 px-4 py-3">{tr('Payment canceled. You can try again any time.')}</div>}
       {unpaid && (
         <div className="mb-6 rounded-lg border border-amber/40 bg-amber-wash p-4 flex flex-wrap gap-4 items-center justify-between">
           <div>
             <p className="font-semibold">{tr('Invoice {number}', { number: unpaid.number })} · {money(unpaid.amount, unpaid.currency)}</p>
             <p className="text-[13px] text-[#7a4d0c]">{tr('Due {date}.', { date: date(unpaid.due_at) })} {unpaid.notes}</p>
           </div>
-          {data.onlinePayments
-            ? <Button variant="primary" icon="card" loading={busy} onClick={() => pay(unpaid)}>{tr('Pay with KNET or card')}</Button>
-            : <p className="text-[13px] max-w-[48ch]">{data.bankDetails || 'Pay by bank transfer and send the receipt to our team. Your plan activates as soon as we confirm it.'}</p>}
+          {data.onlinePayments ? (
+            <div className="flex flex-col items-stretch sm:items-end gap-2">
+              <div className="flex flex-wrap gap-2">
+                {methods.paypal && <Button variant="dark" loading={busy} onClick={() => pay(unpaid, 'paypal')}>{tr('Pay with PayPal')}</Button>}
+                {methods.tap && <Button variant="primary" icon="card" loading={busy} onClick={() => pay(unpaid, 'tap')}>{tr('Pay with KNET or card')}</Button>}
+              </div>
+              {methods.paypal && quote?.converted && (
+                <p className="text-[12px] text-[#7a4d0c]" dir="ltr">{tr('PayPal charges {amount} (converted from {original}).', { amount: `${quote.value} ${quote.currency}`, original: money(unpaid.amount, unpaid.currency) })}</p>
+              )}
+              {unpaid.provider === 'paypal' && <button className="text-[12px] underline text-[#7a4d0c]" onClick={() => check(unpaid)}>{tr('I already paid with PayPal')}</button>}
+            </div>
+          ) : <p className="text-[13px] max-w-[48ch]">{data.bankDetails || tr('Pay by bank transfer and send the receipt to our team. Your plan activates as soon as we confirm it.')}</p>}
         </div>
       )}
       <div className="grid lg:grid-cols-[1fr_360px] gap-6 mb-8">
