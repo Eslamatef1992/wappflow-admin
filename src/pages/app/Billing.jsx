@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { post, useApi } from '../../lib/api.js';
 import { useSession } from '../../lib/session.jsx';
-import { Button, Loading, Meter, PageHeader, Panel, StatusBadge, Table, cx, useAction } from '../../components/ui.jsx';
+import { Button, Loading, Meter, Modal, PageHeader, Panel, StatusBadge, Table, cx, useAction } from '../../components/ui.jsx';
 import { Icon } from '../../components/icons.jsx';
 import { date, money, num } from '../../lib/format.js';
 import { useT, useLang } from '../../lib/i18n.jsx';
@@ -18,19 +18,27 @@ export default function Billing() {
   const { data, reload } = useApi('/api/app/billing');
   const [interval, setInterval_] = useState('monthly');
   const [run, busy] = useAction();
+  const [payFor, setPayFor] = useState(null); // invoice waiting for the customer to pick a payment method
   const [q] = useSearchParams();
   if (!data) return <Loading />;
   const { plan, subscription: sub, usage, invoices, plans, tenant } = data;
   const unpaid = invoices.find((i) => i.status === 'unpaid');
 
-  const choose = (p) => run(async () => { await post('/api/app/billing/subscribe', { planId: p.id, interval }); await reload(); await refresh(); }, 'Invoice created. Pay it to activate the plan.');
+  const methods = data.paymentMethods || {};
+  const online = ['card', 'paypal', 'tap'].filter((m) => methods[m]);
+  // picking a plan goes straight to payment: one method → redirect, several → choose in a popup
+  const choose = (p) => run(async () => {
+    const inv = await post('/api/app/billing/subscribe', { planId: p.id, interval });
+    await reload(); await refresh();
+    if (online.length === 1) { const { url } = await post(`/api/app/billing/invoices/${inv.id}/pay`, { method: online[0] }); window.location.href = url; return; }
+    if (online.length) setPayFor({ ...inv, plan: p });
+  }, online.length ? undefined : 'Invoice created. Pay it to activate the plan.');
   const pay = (inv, method) => run(async () => { const { url } = await post(`/api/app/billing/invoices/${inv.id}/pay`, { method }); window.location.href = url; });
   const check = (inv) => run(async () => {
     const r = await post(`/api/app/billing/invoices/${inv.id}/check`);
     if (!r.paid) throw new Error(tr('We could not find a completed payment for this invoice yet.'));
     await reload(); await refresh();
   }, 'Payment received. Thank you, your plan is active.');
-  const methods = data.paymentMethods || {};
   const quote = unpaid && data.paypalQuotes?.[unpaid.id];
 
   return (
@@ -53,7 +61,7 @@ export default function Billing() {
                 {methods.tap && <Button variant={methods.card ? 'secondary' : 'primary'} icon="card" loading={busy} onClick={() => pay(unpaid, 'tap')}>{tr('Pay with KNET or card')}</Button>}
               </div>
               {methods.paypal && quote?.converted && (
-                <p className="text-[12px] text-[#7a4d0c]" dir="ltr">{tr('Card and PayPal payments are charged {amount} (converted from {original}).', { amount: `${quote.value} ${quote.currency}`, original: money(unpaid.amount, unpaid.currency) })}</p>
+                <p className="text-[12px] text-[#7a4d0c]">{tr('Card and PayPal payments are charged {amount} (converted from {original}).', { amount: `${quote.value} ${quote.currency}`, original: money(unpaid.amount, unpaid.currency) })}</p>
               )}
               {unpaid.provider === 'paypal' && <button className="text-[12px] underline text-[#7a4d0c]" onClick={() => check(unpaid)}>{tr('I already paid')}</button>}
             </div>
@@ -118,6 +126,23 @@ export default function Billing() {
           );
         })}
       </div>
+      <Modal open={!!payFor} onClose={() => setPayFor(null)} title={tr('Pay for the {plan} plan', { plan: payFor?.plan?.name || '' })} width={440}>
+        {payFor && (
+          <div className="space-y-3">
+            <p className="text-[28px] font-semibold tabular-nums" dir="ltr">{money(payFor.amount, payFor.currency)}</p>
+            <p className="text-ink-3 text-[13px] -mt-2">{payFor.notes}</p>
+            {payFor.paypalQuote?.converted && (methods.card || methods.paypal) && (
+              <p className="text-[12px] text-ink-3">{tr('Card and PayPal payments are charged {amount} (converted from {original}).', { amount: `${payFor.paypalQuote.value} ${payFor.paypalQuote.currency}`, original: money(payFor.amount, payFor.currency) })}</p>
+            )}
+            <div className="grid gap-2 pt-1">
+              {methods.card && <Button variant="primary" icon="card" className="h-11" loading={busy} onClick={() => pay(payFor, 'card')}>{tr('Pay with Visa / Mastercard')}</Button>}
+              {methods.paypal && <Button variant="dark" className="h-11" loading={busy} onClick={() => pay(payFor, 'paypal')}>{tr('Pay with PayPal')}</Button>}
+              {methods.tap && <Button className="h-11" icon="card" loading={busy} onClick={() => pay(payFor, 'tap')}>{tr('Pay with KNET or card')}</Button>}
+            </div>
+            <p className="text-[12px] text-ink-3">{tr('Your plan starts as soon as the payment goes through.')}</p>
+          </div>
+        )}
+      </Modal>
     </>
   );
 }

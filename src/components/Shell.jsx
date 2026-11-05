@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation, Link } from 'react-router-dom';
+import { NavLink, Navigate, Outlet, useLocation, Link } from 'react-router-dom';
 import { useSession, useRealtime } from '../lib/session.jsx';
 import { Icon } from './icons.jsx';
 import { Avatar, cx } from './ui.jsx';
@@ -80,7 +80,7 @@ function StatusBanner() {
       )}
       {['past_due', 'suspended'].includes(t?.status) && (
         <div className="bg-danger text-white text-[13px] px-6 py-2 flex items-center justify-between gap-3">
-          <span>{t.status === 'suspended' ? tr('Workspace suspended: messaging is paused until the open invoice is paid.') : tr('Your subscription renewal is unpaid.')}</span>
+          <span>{t.status === 'suspended' ? tr('Your plan has ended. Pay the invoice below to keep using your workspace.') : tr('Your subscription renewal is unpaid.')}</span>
           <Link to="/app/billing" className="font-semibold underline">{tr('Pay invoice')}</Link>
         </div>
       )}
@@ -110,10 +110,13 @@ export function AppShell() {
     { to: '/app/settings', icon: 'settings', label: 'Settings' },
     !isAgent && { to: '/app/billing', icon: 'card', label: 'Plan & billing' },
   ].filter(Boolean);
+  // plan ended unpaid: only Plan & billing is usable until the invoice is paid
+  const locked = me.tenant?.status === 'suspended';
+  if (locked && !loc.pathname.startsWith('/app/billing')) return <Navigate to="/app/billing" replace />;
   const full = loc.pathname.startsWith('/app/inbox') || /^\/app\/flows\/\d+/.test(loc.pathname);
   return (
     <div className={cx('flex flex-col lg:flex-row', full ? 'h-[100dvh]' : 'min-h-screen')}>
-      <Rail items={items} brand={config?.brand || 'WappFlow'} footer={<UserFooter />} />
+      <Rail items={locked ? [{ to: '/app/billing', icon: 'card', label: 'Plan & billing' }] : items} brand={config?.brand || 'WappFlow'} footer={<UserFooter />} />
       <main className="flex-1 min-w-0 min-h-0 flex flex-col">
         <StatusBanner />
         {full ? <div className="flex-1 min-h-0"><Outlet /></div> : <div className="px-4 sm:px-8 py-6 sm:py-8 max-w-[1240px] w-full mx-auto"><Outlet /></div>}

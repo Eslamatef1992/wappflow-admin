@@ -916,4 +916,7 @@ export const AR = {
   'Send invoices to your customers on WhatsApp, from your POS, your website or right here.': 'أرسل الفواتير لعملائك عبر واتساب، من نظام نقاط البيع أو موقعك أو من هنا مباشرة.',
   'Connect your POS or website': 'اربط نظام نقاط البيع أو موقعك',
   'WhatsApp message': 'رسالة واتساب',
+  'Pay for the {plan} plan': 'الدفع لباقة {plan}',
+  'Your plan starts as soon as the payment goes through.': 'تبدأ باقتك فور إتمام الدفع.',
+  'Your plan has ended. Pay the invoice below to keep using your workspace.': 'انتهت باقتك. ادفع الفاتورة بالأسفل لمواصلة استخدام مساحة عملك.',
 };
