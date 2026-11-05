@@ -55,9 +55,9 @@ function Numbers() {
           <li>{tr('Open Meta Business Suite → WhatsApp Manager and copy the Phone number ID and the WhatsApp Business Account ID.')}</li>
           <li>{tr('In Business Settings → System users, create a permanent token with these permissions:')} <span dir="ltr" className="font-mono text-[12px]">whatsapp_business_messaging, whatsapp_business_management</span></li>
         </ol>
-        <Field label="Phone number ID"><Input value={f.phone_number_id || ''} onChange={(e) => setF({ ...f, phone_number_id: e.target.value })} /></Field>
-        <Field label="WhatsApp Business Account ID"><Input value={f.waba_id || ''} onChange={(e) => setF({ ...f, waba_id: e.target.value })} /></Field>
-        <Field label="Permanent access token" hint="Stored encrypted. Never shown again."><Input type="password" value={f.access_token || ''} onChange={(e) => setF({ ...f, access_token: e.target.value })} /></Field>
+        <Field label="Phone number ID"><Input name="wa-phone-number-id" autoComplete="off" inputMode="numeric" dir="ltr" value={f.phone_number_id || ''} onChange={(e) => setF({ ...f, phone_number_id: e.target.value })} /></Field>
+        <Field label="WhatsApp Business Account ID"><Input name="wa-business-account-id" autoComplete="off" inputMode="numeric" dir="ltr" value={f.waba_id || ''} onChange={(e) => setF({ ...f, waba_id: e.target.value })} /></Field>
+        <Field label="Permanent access token" hint="Stored encrypted. Never shown again."><Input type="password" name="wa-access-token" autoComplete="new-password" dir="ltr" value={f.access_token || ''} onChange={(e) => setF({ ...f, access_token: e.target.value })} /></Field>
         <Field label="Label (optional)"><Input value={f.label || ''} placeholder={tr('Main store')} onChange={(e) => setF({ ...f, label: e.target.value })} /></Field>
       </Modal>
       <Modal open={modal === 'mock'} onClose={() => setModal(null)} title={tr('Add a demo number')}
