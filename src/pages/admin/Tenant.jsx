@@ -4,7 +4,7 @@ import { del, patch, post, useApi } from '../../lib/api.js';
 import { useSession } from '../../lib/session.jsx';
 import { Button, Field, Input, Loading, Meter, Modal, PageHeader, Panel, Select, StatusBadge, Table, useAction } from '../../components/ui.jsx';
 import { Icon } from '../../components/icons.jsx';
-import { date, dateTime, money } from '../../lib/format.js';
+import { date, dateTime, money, num } from '../../lib/format.js';
 import { useT } from '../../lib/i18n.jsx';
 
 export default function Tenant() {
@@ -55,6 +55,15 @@ export default function Tenant() {
             <Meter label="Team members" value={usage.agents} max={plan?.limits.agents} />
             <Meter label="Numbers" value={usage.numbers} max={plan?.limits.numbers} />
           </div>
+          <div className="mt-5 pt-4 border-t border-line flex flex-wrap items-end gap-3">
+            <div className="me-auto">
+              <p className="text-ink-3 text-[13px]">{tr('WhatsApp OTP credits')}</p>
+              <p className="text-2xl font-semibold tabular-nums">{num(t.otp_credits || 0)}</p>
+            </div>
+            <Input className="!w-28" type="number" placeholder="500" aria-label={tr('Credits to add')} value={form.credits ?? ''} onChange={(e) => setForm({ ...form, credits: e.target.value })} />
+            <Button size="sm" loading={busy} disabled={!+form.credits} onClick={() => run(async () => { await post(`/api/admin/tenants/${id}/credits`, { credits: +form.credits, note: 'admin' }); setForm({ ...form, credits: '' }); reload(); }, 'Credits updated')}>{tr('Add credits')}</Button>
+          </div>
+          <p className="text-[12px] text-ink-3 mt-1">{tr('Use a negative number to remove credits.')}</p>
         </Panel>
       </div>
       <div className="grid lg:grid-cols-2 gap-6 mb-6">

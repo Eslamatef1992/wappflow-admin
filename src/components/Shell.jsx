@@ -118,6 +118,7 @@ export function AppShell() {
     features.flows !== false && { to: '/app/flows', icon: 'flow', label: 'Chatbots', match: '/app/flows' },
     features.commerce !== false && { to: '/app/commerce', icon: 'cart', label: 'Commerce' },
     !isAgent && features.invoices !== false && { to: '/app/invoices', icon: 'receipt', label: 'Invoices' },
+    !isAgent && features.otp !== false && { to: '/app/otp', icon: 'shield', label: 'WhatsApp OTP' },
     { section: 'Workspace' },
     { to: '/app/settings', icon: 'settings', label: 'Settings' },
     !isAgent && { to: '/app/billing', icon: 'card', label: 'Plan & billing' },

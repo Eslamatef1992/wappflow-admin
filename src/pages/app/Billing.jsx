@@ -8,7 +8,7 @@ import { date, money, num } from '../../lib/format.js';
 import { useT, useLang } from '../../lib/i18n.jsx';
 
 const LIMIT_LABEL = { contacts: 'contacts', monthly_messages: 'messages / month', agents: 'team members', numbers: 'WhatsApp numbers', flows: 'live chatbots' };
-const FEATURE_LABEL = { campaigns: 'Broadcast campaigns', inbox: 'Team inbox', flows: 'Chatbot builder', commerce: 'Store orders & automations', api: 'API & webhooks' };
+const FEATURE_LABEL = { campaigns: 'Broadcast campaigns', inbox: 'Team inbox', flows: 'Chatbot builder', commerce: 'Store orders & automations', api: 'API & webhooks', otp: 'WhatsApp OTP API (credits sold separately)' };
 const lim = (v) => (v == null || v < 0 ? 'Unlimited' : num(v));
 
 export default function Billing() {
