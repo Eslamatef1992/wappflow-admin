@@ -5,6 +5,7 @@ import { Button, Field, IconButton, Input, Loading, Modal, PageHeader, Pager, Se
 import { Icon } from '../../components/icons.jsx';
 import { date, num } from '../../lib/format.js';
 import { useT } from '../../lib/i18n.jsx';
+import ResetPassword from './ResetPassword.jsx';
 
 export default function Tenants() {
   const tr = useT();
@@ -17,6 +18,7 @@ export default function Tenants() {
   const [f, setF] = useState({ company: '', name: '', email: '', password: '', planId: '' });
   const [run, busy] = useAction();
   const [toDelete, setToDelete] = useState(null); // { tenant, confirm }
+  const [resetUser, setResetUser] = useState(null);
   useEffect(() => { const t = setTimeout(() => { setDq(q); setPage(1); }, 300); return () => clearTimeout(t); }, [q]);
   const { data, reload } = useApi(`/api/admin/tenants?page=${page}${dq ? `&q=${encodeURIComponent(dq)}` : ''}${status ? `&status=${status}` : ''}`);
   const plans = useApi('/api/admin/plans');
@@ -43,7 +45,8 @@ export default function Tenants() {
                 { label: 'Messages (month)', key: 'm', render: (t) => <span className="tabular-nums">{num(t.messages_this_month)}</span> },
                 { label: 'Joined', key: 'c', render: (t) => <span className="text-ink-3">{date(t.created_at)}</span> },
                 { label: '', key: 'x', className: 'text-end', render: (t) => (
-                  <span onClick={(e) => e.stopPropagation()} className="inline-flex">
+                  <span onClick={(e) => e.stopPropagation()} className="inline-flex gap-1">
+                    {t.owner?.id && <IconButton icon="key" label={tr('Reset owner password')} onClick={() => setResetUser(t.owner)} />}
                     <IconButton icon="trash" label={tr('Delete workspace')} className="hover:!text-danger" onClick={() => setToDelete({ tenant: t, confirm: '' })} />
                   </span>
                 ) },
@@ -52,6 +55,7 @@ export default function Tenants() {
           </>
         )}
       </div>
+      <ResetPassword user={resetUser} onClose={() => setResetUser(null)} />
       <Modal open={!!toDelete} onClose={() => setToDelete(null)} title={tr('Delete {name}?', { name: toDelete?.tenant.name || '' })}
         footer={<><Button onClick={() => setToDelete(null)}>{tr('Cancel')}</Button><Button variant="dark" className="!bg-danger" loading={busy} disabled={toDelete?.confirm !== toDelete?.tenant.slug}
           onClick={() => run(async () => { await del(`/api/admin/tenants/${toDelete.tenant.id}`, { confirm: toDelete.confirm }); setToDelete(null); reload(); }, 'Workspace deleted')}>{tr('Delete permanently')}</Button></>}>

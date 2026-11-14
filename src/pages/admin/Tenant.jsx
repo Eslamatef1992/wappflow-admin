@@ -6,6 +6,7 @@ import { Button, Field, Input, Loading, Meter, Modal, PageHeader, Panel, Select,
 import { Icon } from '../../components/icons.jsx';
 import { date, dateTime, money, num } from '../../lib/format.js';
 import { useT } from '../../lib/i18n.jsx';
+import ResetPassword from './ResetPassword.jsx';
 
 export default function Tenant() {
   const tr = useT();
@@ -17,6 +18,7 @@ export default function Tenant() {
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState({});
   const [run, busy] = useAction();
+  const [resetUser, setResetUser] = useState(null);
   if (!data || !plans.data) return <Loading />;
   const { tenant: t, users, numbers, subscription: sub, invoices, usage } = data;
   const plan = plans.data.find((p) => p.id === t.plan_id);
@@ -85,6 +87,7 @@ export default function Tenant() {
             { label: 'Name', key: 'n', render: (u) => <div><p className="font-medium">{u.name}</p><p className="text-ink-3 text-[12px]">{u.email}</p></div> },
             { label: 'Role', key: 'r', render: (u) => <span className="capitalize">{tr(u.role)}</span> },
             { label: 'Last seen', key: 'l', render: (u) => <span className="text-ink-3">{dateTime(u.last_seen_at)}</span> },
+            { label: '', key: 'p', className: 'text-end', render: (u) => <Button size="sm" icon="key" onClick={() => setResetUser(u)}>{tr('Reset password')}</Button> },
           ]} />
         </Panel>
         <Panel title={tr('WhatsApp numbers')} padded={false}>
@@ -122,6 +125,7 @@ export default function Tenant() {
         <Field label="Billing period"><Select value={form.interval} onChange={(e) => setForm({ ...form, interval: e.target.value })} options={[{ value: 'monthly', label: 'Monthly' }, { value: 'yearly', label: 'Yearly' }]} /></Field>
         <Field label="Note (optional)"><Input value={form.notes || ''} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
       </Modal>
+      <ResetPassword user={resetUser} onClose={() => setResetUser(null)} />
       <Modal open={modal === 'activate'} onClose={() => setModal(null)} title={tr('Activate as paid')}
         footer={<><Button onClick={() => setModal(null)}>{tr('Cancel')}</Button><Button variant="primary" loading={busy} disabled={form.mode === 'until' && !form.until} onClick={() => run(async () => {
           await post(`/api/admin/tenants/${id}/activate`, { planId: +form.planId, interval: form.interval, periods: form.mode === 'periods' ? +form.periods : undefined, until: form.mode === 'until' ? form.until : undefined, amount: form.amount === '' ? 0 : +form.amount, reference: form.reference, sendReceipt: form.sendReceipt });
