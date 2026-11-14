@@ -21,6 +21,20 @@ export default function Tenant() {
   const { tenant: t, users, numbers, subscription: sub, invoices, usage } = data;
   const plan = plans.data.find((p) => p.id === t.plan_id);
   const update = (body, msg) => run(async () => { await patch(`/api/admin/tenants/${id}`, body); reload(); }, msg);
+  const priceOf = (pid, iv) => { const p = plans.data.find((x) => x.id === +pid); if (!p) return 0; return iv === 'yearly' ? (+p.price_yearly || +p.price_monthly * 12) : +p.price_monthly; };
+  const openActivate = () => {
+    const pid = t.plan_id || plans.data[0]?.id;
+    setForm({ planId: pid, interval: 'monthly', periods: 1, mode: 'periods', until: '', amount: String(priceOf(pid, 'monthly')), reference: '', sendReceipt: true });
+    setModal('activate');
+  };
+  const runningEnd = sub?.status === 'active' && sub.current_period_end > Date.now() ? sub.current_period_end : Date.now();
+  const previewEnd = () => {
+    if (form.mode === 'until') return form.until ? Date.parse(form.until + 'T12:00:00Z') : null;
+    const d = new Date(runningEnd); const n = Math.max(1, +form.periods || 1);
+    if (form.interval === 'yearly') d.setUTCFullYear(d.getUTCFullYear() + n); else d.setUTCMonth(d.getUTCMonth() + n);
+    return d.getTime();
+  };
+  const setPlanOrPeriod = (patchF) => { const f = { ...form, ...patchF }; setForm({ ...f, amount: f.mode === 'until' ? f.amount : String(priceOf(f.planId, f.interval) * Math.max(1, +f.periods || 1)) }); };
 
   return (
     <>
@@ -29,9 +43,8 @@ export default function Tenant() {
         subtitle={<span className="flex items-center gap-2"><StatusBadge status={t.status} /><span>{tr('{plan} · joined {date}', { plan: plan?.name || '', date: date(t.created_at) })}</span></span>}
         actions={<>
           <Button icon="shield" loading={busy} onClick={() => run(async () => { const r = await post(`/api/admin/tenants/${id}/impersonate`); impersonate(r.token); })}>{tr('Open as owner')}</Button>
-          {t.status === 'suspended'
-            ? <Button variant="primary" onClick={() => update({ status: 'active' }, 'Workspace reactivated')}>{tr('Reactivate')}</Button>
-            : <Button variant="danger" onClick={() => update({ status: 'suspended' }, 'Workspace suspended')}>{tr('Suspend')}</Button>}
+          <Button variant="primary" icon="check" onClick={openActivate}>{tr('Activate as paid')}</Button>
+          {t.status !== 'suspended' && <Button variant="danger" onClick={() => update({ status: 'suspended' }, 'Workspace suspended')}>{tr('Suspend')}</Button>}
         </>} />
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         <Panel title={tr('Subscription')}>
@@ -108,6 +121,35 @@ export default function Tenant() {
         <Field label="Plan"><Select value={form.planId || ''} onChange={(e) => setForm({ ...form, planId: +e.target.value })} options={plans.data.map((p) => ({ value: p.id, label: p.name }))} /></Field>
         <Field label="Billing period"><Select value={form.interval} onChange={(e) => setForm({ ...form, interval: e.target.value })} options={[{ value: 'monthly', label: 'Monthly' }, { value: 'yearly', label: 'Yearly' }]} /></Field>
         <Field label="Note (optional)"><Input value={form.notes || ''} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+      </Modal>
+      <Modal open={modal === 'activate'} onClose={() => setModal(null)} title={tr('Activate as paid')}
+        footer={<><Button onClick={() => setModal(null)}>{tr('Cancel')}</Button><Button variant="primary" loading={busy} disabled={form.mode === 'until' && !form.until} onClick={() => run(async () => {
+          await post(`/api/admin/tenants/${id}/activate`, { planId: +form.planId, interval: form.interval, periods: form.mode === 'periods' ? +form.periods : undefined, until: form.mode === 'until' ? form.until : undefined, amount: form.amount === '' ? 0 : +form.amount, reference: form.reference, sendReceipt: form.sendReceipt });
+          setModal(null); reload();
+        }, 'Workspace activated')}>{tr('Activate workspace')}</Button></>}>
+        <p className="text-[13px] text-ink-3 mb-4">{tr('For customers who paid by cash, KNET or bank transfer, or for a free account. The workspace unlocks right away: it can connect a real WhatsApp number and send messages.')}</p>
+        <Field label="Plan"><Select value={form.planId || ''} onChange={(e) => setPlanOrPeriod({ planId: +e.target.value })} options={plans.data.map((p) => ({ value: p.id, label: `${p.name} · ${money(p.price_monthly, p.currency)} / ${tr('month')}` }))} /></Field>
+        <Field label="How long">
+          <div className="flex flex-wrap gap-2">
+            {[['periods', 'Number of months / years'], ['until', 'Until a date']].map(([v, l]) => (
+              <button key={v} type="button" onClick={() => setPlanOrPeriod({ mode: v })} className={`px-3 h-9 rounded-lg border text-[13px] ${form.mode === v ? 'bg-ink text-white border-ink' : 'border-line hover:bg-paper'}`}>{tr(l)}</button>
+            ))}
+          </div>
+        </Field>
+        {form.mode === 'periods' ? (
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Count"><Input type="number" min="1" max="36" value={form.periods ?? 1} onChange={(e) => setPlanOrPeriod({ periods: e.target.value })} /></Field>
+            <Field label="Billing period"><Select value={form.interval} onChange={(e) => setPlanOrPeriod({ interval: e.target.value })} options={[{ value: 'monthly', label: tr('Monthly') }, { value: 'yearly', label: tr('Yearly') }]} /></Field>
+          </div>
+        ) : (
+          <Field label="Active until"><Input type="date" value={form.until || ''} min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)} onChange={(e) => setForm({ ...form, until: e.target.value })} /></Field>
+        )}
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Amount received" hint={tr('0 for a free account')}><Input type="number" min="0" step="0.001" value={form.amount ?? ''} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></Field>
+          <Field label="Payment reference (optional)"><Input placeholder="KNET 5521 / cash" value={form.reference || ''} onChange={(e) => setForm({ ...form, reference: e.target.value })} /></Field>
+        </div>
+        <label className="flex items-center gap-2 text-[13px] mb-3"><input type="checkbox" checked={!!form.sendReceipt} onChange={(e) => setForm({ ...form, sendReceipt: e.target.checked })} />{tr('Email the owner a receipt')}</label>
+        {previewEnd() && <p className="rounded-lg bg-paper p-3 text-[13px]">{tr('Active until {date}', { date: date(previewEnd()) })}{+form.amount > 0 ? ` · ${money(+form.amount, plans.data.find((p) => p.id === +form.planId)?.currency || 'KWD')}` : ` · ${tr('free')}`}</p>}
       </Modal>
       <Modal open={modal === 'delete'} onClose={() => setModal(null)} title={tr('Delete workspace')}
         footer={<><Button onClick={() => setModal(null)}>{tr('Cancel')}</Button><Button variant="dark" className="!bg-danger" loading={busy} disabled={form.confirm !== t.slug} onClick={() => run(async () => { await del(`/api/admin/tenants/${id}`, { confirm: form.confirm }); nav('/admin/tenants'); }, 'Workspace deleted')}>{tr('Delete permanently')}</Button></>}>
